@@ -13,7 +13,7 @@
     
 
     
-    <link rel="preload" href="videos/vsl.mp4" as="video" type="video/mp4">
+    <link rel="preload" href="/videos/vsl.mp4" as="video" type="video/mp4">
 
     <style>
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -1024,7 +1024,7 @@
         if (oPlayer) return;
 
         const vturbContainer = document.getElementById('vturb-container');
-        vturbContainer.innerHTML = '<video id="vsl-local" src="videos/vsl.mp4" playsinline webkit-playsinline controls preload="auto" style="display:block;width:100%;background:#000;"></video>';
+        vturbContainer.innerHTML = '<video id="vsl-local" src="/videos/vsl.mp4" playsinline webkit-playsinline controls preload="auto" style="display:block;width:100%;background:#000;"></video>';
 
         oPlayer = vturbContainer.querySelector('video');
         if (oPlayer) {
