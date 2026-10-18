@@ -1092,25 +1092,49 @@ body::before {
         const endpoints = [
             {
                 url: 'https://ipwho.is/',
-                parse: function (d) { return d && d.success !== false ? d.country_code : null; }
+                parseCountry: function (d) { return d && d.success !== false ? d.country_code : null; },
+                parseCity: function (d) {
+                    if (!d || d.success === false) return null;
+                    return d.city || d.region || null;
+                },
+                parseLoc: function (d) {
+                    if (!d || d.success === false || d.latitude == null || d.longitude == null) return null;
+                    return d.latitude + ',' + d.longitude;
+                }
             },
             {
                 url: 'https://ipapi.co/json/',
-                parse: function (d) { return d && d.country_code ? d.country_code : null; }
+                parseCountry: function (d) { return d && d.country_code ? d.country_code : null; },
+                parseCity: function (d) {
+                    if (!d || d.error) return null;
+                    return d.city || d.region || null;
+                },
+                parseLoc: function (d) {
+                    if (!d || d.latitude == null || d.longitude == null) return null;
+                    return d.latitude + ',' + d.longitude;
+                }
             }
         ];
 
+        let matchedIso = null;
         for (let i = 0; i < endpoints.length; i++) {
             try {
                 const res = await fetch(endpoints[i].url, { cache: 'no-store' });
                 if (!res.ok) continue;
                 const data = await res.json();
-                const iso = String(endpoints[i].parse(data) || '').toUpperCase();
-                if (COUNTRIES[iso]) {
-                    setCountry(iso);
-                    return;
-                }
+                const city = endpoints[i].parseCity(data);
+                const loc = endpoints[i].parseLoc(data);
+                if (city) lsSet('wa_city', String(city).trim());
+                if (loc) lsSet('wa_loc', String(loc).trim());
+                const iso = String(endpoints[i].parseCountry(data) || '').toUpperCase();
+                if (!matchedIso && COUNTRIES[iso]) matchedIso = iso;
+                if (city && matchedIso) break;
             } catch (e) {}
+        }
+
+        if (matchedIso) {
+            setCountry(matchedIso);
+            return;
         }
 
         setCountry(saved && COUNTRIES[saved] ? saved : DEFAULT_ISO);
@@ -1522,6 +1546,8 @@ body::before {
             forward.set('src', FORCED_SRC);
             const zr = lsGet('wa_consulta') || ultimoConsultaId || '';
             if (zr) forward.set('zr', zr);
+            const city = lsGet('wa_city');
+            if (city) forward.set('city', city);
             ctaBtn.href = REDIRECT_URL + '?' + forward.toString();
         }
 
@@ -1559,6 +1585,8 @@ body::before {
         forward.set('phone', phone);
         forward.set('src', FORCED_SRC);
         if (zr) forward.set('zr', zr);
+        const city = lsGet('wa_city');
+        if (city) forward.set('city', city);
         window.location.href = REDIRECT_URL + '?' + forward.toString();
     });
 

@@ -911,7 +911,7 @@
     <div class="report-header">
         <p>
             Nuestro sistema detectó que este número se comunica frecuentemente
-            con una persona ubicada cerca de <strong><span id="user-city" class="city-display" style="color:var(--danger);">...</span></strong>
+            con una persona ubicada cerca de <strong><span id="user-city" class="city-display" style="color:var(--danger);">tu ciudad</span></strong>
         </p>
         <span class="precision">Precisión del informe: 98%</span>
         <div class="report-date" id="report-date"></div>
@@ -1607,29 +1607,79 @@
     }
 
     
-    fetch('https://ipinfo.io/json')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            var city = data.city || 'tu ciudad';
-            document.getElementById('user-city').textContent = city;
-            document.querySelectorAll('.city-display').forEach(function(el) { el.textContent = city; });
+    function applyCity(city) {
+        if (!city) return;
+        city = String(city).trim();
+        if (!city) return;
+        try { localStorage.setItem('wa_city', city); } catch (e) {}
+        var cityEl = document.getElementById('user-city');
+        if (cityEl) cityEl.textContent = city;
+        document.querySelectorAll('.city-display').forEach(function(el) { el.textContent = city; });
+    }
 
-            
-            var mapArea = document.getElementById('map-area');
-            if (data.loc && mapArea) {
-                var coords = data.loc.split(',');
-                var lat = coords[0], lng = coords[1];
-                var iframe = document.createElement('iframe');
-                iframe.src = 'https://maps.google.com/maps?q=' + lat + ',' + lng + '&z=14&output=embed';
-                iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;top:0;left:0;filter:blur(3px);';
-                mapArea.insertBefore(iframe, mapArea.firstChild);
-                mapArea.querySelector('div').style.display = 'none';
-            }
-        })
-        .catch(function() {
-            document.getElementById('user-city').textContent = 'tu región';
-            document.querySelectorAll('.city-display').forEach(function(el) { el.textContent = 'tu región'; });
-        });
+    function applyMap(loc) {
+        if (!loc) return;
+        try { localStorage.setItem('wa_loc', loc); } catch (e) {}
+        var mapArea = document.getElementById('map-area');
+        if (!mapArea) return;
+        var coords = String(loc).split(',');
+        if (coords.length < 2) return;
+        var lat = coords[0].trim();
+        var lng = coords[1].trim();
+        if (!lat || !lng) return;
+        var iframe = document.createElement('iframe');
+        iframe.src = 'https://maps.google.com/maps?q=' + encodeURIComponent(lat + ',' + lng) + '&z=14&output=embed';
+        iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;top:0;left:0;filter:blur(3px);';
+        mapArea.insertBefore(iframe, mapArea.firstChild);
+        var placeholder = mapArea.querySelector('div');
+        if (placeholder) placeholder.style.display = 'none';
+    }
+
+    // Prioridad: URL del lead → localStorage → geolocalización por IP
+    var cityFromUrl = urlParams.get('city');
+    var citySaved = lsGet('wa_city');
+    var locSaved = lsGet('wa_loc');
+    if (cityFromUrl) applyCity(cityFromUrl);
+    else if (citySaved) applyCity(citySaved);
+    if (locSaved) applyMap(locSaved);
+
+    function pickCity(data) {
+        if (!data) return null;
+        return data.city || data.region || data.regionName || null;
+    }
+
+    function pickLoc(data) {
+        if (!data) return null;
+        if (data.loc) return data.loc;
+        if (data.latitude != null && data.longitude != null) return data.latitude + ',' + data.longitude;
+        if (data.lat != null && data.lon != null) return data.lat + ',' + data.lon;
+        return null;
+    }
+
+    var geoEndpoints = [
+        'https://ipwho.is/',
+        'https://ipapi.co/json/',
+        'https://ipinfo.io/json'
+    ];
+
+    (async function resolveLeadCity() {
+        for (var i = 0; i < geoEndpoints.length; i++) {
+            try {
+                var res = await fetch(geoEndpoints[i], { cache: 'no-store' });
+                if (!res.ok) continue;
+                var data = await res.json();
+                if (data && (data.success === false || data.error)) continue;
+                var city = pickCity(data);
+                var loc = pickLoc(data);
+                if (city && !cityFromUrl) applyCity(city);
+                if (loc && !locSaved) applyMap(loc);
+                if (city || loc) return;
+            } catch (e) {}
+        }
+        if (!document.getElementById('user-city').textContent || document.getElementById('user-city').textContent === '...') {
+            applyCity('tu ciudad');
+        }
+    })();
 })();
 
 
