@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soporte al consumidor — WPP</title>
+<meta name="description" content="Soporte al consumidor, ayuda y contacto de WPP.">
+<link rel="shortcut icon" href="/images/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --wa: #1faa55;
+  --wa-bright: #25d366;
+  --ink: #071410;
+  --panel: #0c1f1a;
+  --surface: #132e27;
+  --line: rgba(212, 245, 227, 0.12);
+  --text: #eef7f2;
+  --muted: #8fad9f;
+  --danger: #ff6b6b;
+  --radius: 18px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+html, body { min-height: 100%; }
+body {
+  font-family: "Source Sans 3", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(37, 211, 102, 0.16), transparent 55%),
+    radial-gradient(800px 500px at 100% 100%, rgba(7, 94, 84, 0.45), transparent 50%),
+    var(--ink);
+  padding: 28px 16px 56px;
+}
+.wrap { width: 100%; max-width: 640px; margin: 0 auto; }
+.brand {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+}
+.brand a { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+.brand-mark {
+  width: 44px; height: 44px; border-radius: 14px; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--line); flex-shrink: 0;
+}
+.brand-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.brand-name { font-family: Outfit, sans-serif; font-weight: 700; font-size: 1.05rem; }
+.brand-tag { color: var(--muted); font-size: 0.82rem; }
+.shell {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px 24px 32px;
+}
+h1 {
+  font-family: Outfit, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.lead { color: var(--muted); font-size: 1rem; line-height: 1.55; margin-bottom: 22px; }
+h2 {
+  font-family: Outfit, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 20px 0 8px;
+  color: var(--wa-bright);
+}
+p, li { color: #cfe3d8; font-size: 0.98rem; line-height: 1.65; }
+ul { margin: 8px 0 0 1.2rem; }
+li { margin-bottom: 6px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 16px;
+  margin: 14px 0;
+}
+.card strong {
+  display: block;
+  font-family: Outfit, sans-serif;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.card a { color: var(--wa-bright); font-weight: 600; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.field-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 14px 0 8px;
+}
+input, textarea, select {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-family: Outfit, sans-serif;
+  font-size: 0.98rem;
+  color: var(--text);
+  outline: none;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: rgba(37, 211, 102, 0.55);
+}
+textarea { min-height: 120px; resize: vertical; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px 18px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #2be06f, var(--wa));
+  color: #04210f;
+  font-family: Outfit, sans-serif;
+  font-size: 1.02rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s var(--ease), filter 0.18s var(--ease);
+}
+.btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+.msg {
+  display: none;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(37, 211, 102, 0.12);
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  color: #d4f5e3;
+  font-size: 0.92rem;
+}
+.msg.show { display: block; }
+.msg.err {
+  background: rgba(255, 107, 107, 0.12);
+  border-color: rgba(255, 107, 107, 0.35);
+  color: #ffc9c9;
+}
+.links {
+  display: flex; flex-wrap: wrap; gap: 14px;
+  margin-top: 28px; padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.links a {
+  color: var(--wa-bright);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.links a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <a href="/index.html">
+      <div class="brand-mark"><img src="/images/logo.webp" alt="WPP"></div>
+      <div>
+        <div class="brand-name">WPP</div>
+        <div class="brand-tag">Soporte al consumidor</div>
+      </div>
+    </a>
+  </header>
+
+  <section class="shell">
+    <h1>Soporte al consumidor</h1>
+    <p class="lead">¿Necesitas ayuda con el servicio, un reembolso o tienes una duda? Estamos aquí para ayudarte.</p>
+
+    <h2>Canales de contacto</h2>
+    <div class="card">
+      <strong>Correo de soporte</strong>
+      <a href="mailto:soporte@wpp.help">soporte@wpp.help</a>
+      <p style="margin-top:8px;font-size:0.9rem;color:var(--muted)">Tiempo de respuesta habitual: hasta 48 horas hábiles.</p>
+    </div>
+
+    <h2>Horario de atención</h2>
+    <p>Lunes a viernes, 9:00–18:00 (hora de Ciudad de México, UTC−6). Los mensajes recibidos fuera de horario se responden el siguiente día hábil.</p>
+
+    <h2>Temas frecuentes</h2>
+    <ul>
+      <li>Acceso al servicio y problemas técnicos en la página.</li>
+      <li>Dudas sobre el análisis o el video explicativo.</li>
+      <li>Solicitudes de privacidad (acceso, corrección o eliminación de datos).</li>
+      <li>Reembolsos o cargos (si aplican según tu compra).</li>
+    </ul>
+
+    <h2>Envíanos un mensaje</h2>
+    <form id="supportForm" novalidate>
+      <div class="field-label">Nombre</div>
+      <input id="name" name="name" type="text" autocomplete="name" placeholder="Tu nombre" required>
+
+      <div class="field-label">Correo electrónico</div>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" required>
+
+      <div class="field-label">Asunto</div>
+      <select id="topic" name="topic" required>
+        <option value="">Selecciona un tema</option>
+        <option value="tecnico">Problema técnico</option>
+        <option value="cuenta">Acceso / servicio</option>
+        <option value="privacidad">Privacidad y datos</option>
+        <option value="reembolso">Reembolso / pago</option>
+        <option value="otro">Otro</option>
+      </select>
+
+      <div class="field-label">Mensaje</div>
+      <textarea id="message" name="message" placeholder="Cuéntanos qué necesitas…" required></textarea>
+
+      <button type="submit" class="btn" id="sendBtn">Enviar solicitud</button>
+      <div id="formMsg" class="msg" role="status"></div>
+    </form>
+
+    <div class="links">
+      <a href="/index.html">← Volver al inicio</a>
+      <a href="/privacidad.html">Política de privacidad</a>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var form = document.getElementById('supportForm');
+  var msg = document.getElementById('formMsg');
+  var btn = document.getElementById('sendBtn');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    msg.classList.remove('show', 'err');
+
+    var name = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var topic = document.getElementById('topic').value;
+    var message = document.getElementById('message').value.trim();
+
+    if (!name || !email || !topic || !message) {
+      msg.textContent = 'Completa todos los campos para continuar.';
+      msg.classList.add('show', 'err');
+      return;
+    }
+
+    var subject = encodeURIComponent('[Soporte WPP] ' + topic + ' — ' + name);
+    var body = encodeURIComponent(
+      'Nombre: ' + name + '\n' +
+      'Email: ' + email + '\n' +
+      'Asunto: ' + topic + '\n\n' +
+      message
+    );
+
+    btn.disabled = true;
+    window.location.href = 'mailto:soporte@wpp.help?subject=' + subject + '&body=' + body;
+
+    msg.textContent = 'Se abrió tu correo para enviar la solicitud. Si no se abre, escribe a soporte@wpp.help.';
+    msg.classList.add('show');
+    setTimeout(function () { btn.disabled = false; }, 1500);
+  });
+})();
+</script>
+</body>
+</html>
