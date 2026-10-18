@@ -1,754 +1,982 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8">
-    
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>WPP</title>
+<meta name="description" content="Veja o que acontece no WhatsApp.">
+<link rel="shortcut icon" href="/images/logo.webp">
+<link rel="preload" href="/videos/vsl.mp4" as="video" type="video/mp4">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+:root {
+  --wa: #1faa55;
+  --wa-bright: #25d366;
+  --ink: #071410;
+  --panel: #0c1f1a;
+  --surface: #132e27;
+  --line: rgba(212, 245, 227, 0.12);
+  --text: #eef7f2;
+  --muted: #8fad9f;
+  --danger: #ff6b6b;
+  --warn: #e8b84a;
+  --radius: 18px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
 
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+html, body { min-height: 100%; }
 
-    <title>WPP</title>
-    <meta name="description" content="Wpp.">
+body {
+  font-family: "Source Sans 3", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(37, 211, 102, 0.16), transparent 55%),
+    radial-gradient(800px 500px at 100% 100%, rgba(7, 94, 84, 0.45), transparent 50%),
+    var(--ink);
+  display: flex;
+  justify-content: center;
+  padding: 28px 16px 48px;
+  position: relative;
+  overflow-x: hidden;
+}
 
-    <link rel="shortcut icon" href="images/logo.webp">
-    
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(37, 211, 102, 0.07) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.04) 0 1px, transparent 1.5px);
+  background-size: 28px 28px, 42px 42px;
+  z-index: 0;
+}
 
-    
-    <link rel="preload" href="/videos/vsl.mp4" as="video" type="video/mp4">
+.hide { display: none !important; }
 
-    <style>
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+#step-input,
+#step-analysis {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
 
-        :root {
-            --wa-green: #25D366;
-            --wa-dark: #128C7E;
-            --wa-darker: #075E54;
-            --wa-teal: #00BFA5;
-            --wa-light: #e2e8f0;
-            --wa-white: #ffffff;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --radius: 16px;
-        }
+#step-analysis { display: none; }
 
-        body {
-            background: var(--bg);
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+/* —— Input step —— */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  animation: rise 0.7s var(--ease) both;
+}
 
-        .hide { display: none !important; }
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
 
-        
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
-        .page-wrap {
-            width: 100%;
-            max-width: 400px;
-        }
+.brand-name {
+  font-family: Outfit, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
 
-        .card {
-            background: var(--card);
-            border-radius: 24px;
-            padding: 40px 28px;
-            box-shadow: 0 4px 40px rgba(0,0,0,0.08);
-        }
+.brand-tag {
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
 
-        .card-headline {
-            font-size: 26px;
-            font-weight: 700;
-            line-height: 1.3;
-            color: var(--text-dark);
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .card-headline .highlight {
-            color: var(--wa-green);
-        }
-        .card-sub {
-            font-size: 15px;
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 32px;
-            text-align: center;
-        }
+.shell {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), transparent 40%),
+    var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: 32px 24px 28px;
+  position: relative;
+  overflow: hidden;
+  animation: rise 0.8s var(--ease) 0.08s both;
+}
 
-        .field-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+.shell::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -40% -20%;
+  height: 55%;
+  background: radial-gradient(ellipse at center, rgba(37, 211, 102, 0.12), transparent 70%);
+  pointer-events: none;
+}
 
-        
-        .phone-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-        .phone-prefix {
-            min-width: 72px;
-            padding: 16px 14px;
-            background: #f1f5f9;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-dark);
-            text-align: center;
-        }
-        .phone-number-input {
-            flex: 1;
-            padding: 16px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 16px;
-            color: var(--text-dark);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .phone-number-input::placeholder {
-            color: #94a3b8;
-        }
-        .phone-number-input:focus {
-            border-color: var(--wa-green);
-            box-shadow: 0 0 0 3px rgba(37,211,102,0.1);
-        }
-        .input-error {
-            display: none;
-            font-size: 13px;
-            color: #ef4444;
-            margin-top: -18px;
-            margin-bottom: 16px;
-        }
-        .input-error.show { display: block; }
+.shell > * { position: relative; z-index: 1; }
 
-        
-        .btn-spy {
-            width: 100%;
-            padding: 18px;
-            border: none;
-            border-radius: var(--radius);
-            background: var(--wa-green);
-            color: #fff;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .btn-spy:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 24px rgba(37,211,102,0.35);
-        }
-        .btn-spy:active {
-            transform: translateY(0);
-        }
-        .btn-spy:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-spy-inner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .btn-spy-inner svg { width: 20px; height: 20px; }
+.card-headline {
+  font-family: Outfit, sans-serif;
+  font-size: clamp(1.65rem, 5vw, 1.95rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  margin-bottom: 12px;
+}
 
-        
-        .loading-bar-wrap {
-            display: none;
-            margin-top: 20px;
-        }
-        .loading-bar-wrap.show { display: block; }
-        .loading-bar-label {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .loading-bar-track {
-            width: 100%;
-            height: 6px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .loading-bar-fill {
-            width: 0%;
-            height: 100%;
-            background: var(--wa-green);
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
+.card-headline .highlight {
+  color: var(--wa-bright);
+  font-style: italic;
+  font-weight: 600;
+}
 
-        .security-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 20px;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-        .security-row svg { width: 14px; height: 14px; color: var(--wa-green); }
+.card-sub {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin-bottom: 28px;
+  max-width: 32ch;
+}
 
-        
+.field-label {
+  font-family: Outfit, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
 
+.phone-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+}
 
-        #step-analysis {
-            display: none;
-        }
+.phone-prefix {
+  min-width: 68px;
+  padding: 15px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-family: Outfit, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
 
-        .top-bar {
-            background: linear-gradient(135deg, var(--wa-darker), var(--wa-dark));
-            color: #fff;
-            text-align: center;
-            padding: 12px 16px;
-            font-size: 13px;
-            font-weight: 600;
-        }
+.phone-number-input {
+  flex: 1;
+  padding: 15px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-family: Outfit, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s var(--ease), background 0.2s;
+}
 
-        .container {
-            max-width: 440px;
-            margin: 0 auto;
-            padding: 20px 16px 60px;
-        }
+.phone-number-input::placeholder { color: rgba(143, 173, 159, 0.55); }
 
-        .vsl-label {
-            text-align: center;
-            margin-bottom: 14px;
-        }
-        .watch-tag {
-            display: inline-block;
-            background: var(--wa-green);
-            color: #fff;
-            font-size: 11px;
-            font-weight: 800;
-            padding: 5px 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-        .vsl-label h2 {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-dark);
-            line-height: 1.5;
-        }
+.phone-number-input:focus {
+  border-color: rgba(37, 211, 102, 0.55);
+  background: #17382f;
+}
 
-        .vsl-wrapper {
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.12);
-            background: #000;
-        }
-        .vsl-wrapper video {
-            display: block;
-            width: 100%;
-            height: auto;
-            aspect-ratio: 16 / 9;
-            background: #000;
-        }
+.input-error {
+  display: none;
+  font-size: 0.85rem;
+  color: var(--danger);
+  margin: -12px 0 16px;
+}
 
-        .cta-btn-wrap { margin-bottom: 22px; }
-        .cta-btn {
-            display: block;
-            width: 100%;
-            padding: 18px 24px;
-            background: linear-gradient(135deg, var(--wa-green), var(--wa-dark));
-            color: #fff;
-            font-size: 16px;
-            font-weight: 800;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(37,211,102,0.4);
-        }
+.input-error.show { display: block; }
 
-        .analysis-block {
-            background: var(--wa-white);
-            border: 1px solid var(--wa-light);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
+.btn-spy {
+  width: 100%;
+  padding: 16px 18px;
+  border: none;
+  border-radius: 14px;
+  background: var(--wa-bright);
+  color: #042016;
+  font-family: Outfit, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), filter 0.2s;
+}
 
-        .profile-progress-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 18px;
-        }
+.btn-spy:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.btn-spy:active { transform: translateY(0); }
+.btn-spy:disabled { opacity: 0.65; cursor: not-allowed; transform: none; filter: none; }
 
-        .avatar-wrap {
-            position: relative;
-            width: 56px; height: 56px;
-            flex-shrink: 0;
-        }
+.btn-spy-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
 
-        .profile-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            position: absolute;
-            top: 4px;
-            left: 4px;
-        }
+.btn-spy-inner svg { width: 18px; height: 18px; }
 
-        @keyframes avatarScan {
-            0% { clip-path: inset(0 0 100% 0); filter: brightness(1.5) contrast(0.5); }
-            50% { clip-path: inset(0 0 0% 0); filter: brightness(1.2) contrast(0.8); }
-            100% { clip-path: inset(100% 0 0 0); filter: brightness(1.5) contrast(0.5); }
-        }
-        @keyframes avatarScanLine {
-            0% { top: 4px; }
-            50% { top: 48px; }
-            100% { top: 4px; }
-        }
-        .avatar-scanning .profile-avatar {
-            animation: avatarScan 1.8s ease-in-out infinite;
-            opacity: 0.6;
-        }
-        .avatar-scan-line {
-            display: none;
-            position: absolute;
-            left: 4px;
-            width: 48px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #25D366, transparent);
-            border-radius: 1px;
-            z-index: 10;
-            box-shadow: 0 0 8px #25D366, 0 0 16px rgba(37,211,102,0.4);
-            animation: avatarScanLine 1.8s ease-in-out infinite;
-        }
-        .avatar-scanning .avatar-scan-line { display: block; }
-        .avatar-reveal {
-            animation: avatarReveal 0.8s ease-out forwards !important;
-            opacity: 1 !important;
-        }
-        @keyframes avatarReveal {
-            0% { clip-path: inset(0 0 100% 0); filter: brightness(2) contrast(0.5); }
-            60% { clip-path: inset(0 0 0% 0); filter: brightness(1.2) contrast(0.9); }
-            100% { clip-path: inset(0); filter: brightness(1) contrast(1); }
-        }
+.loading-bar-wrap {
+  display: none;
+  margin-top: 18px;
+}
 
-        .profile-info { flex: 1; min-width: 0; }
-        .profile-number {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-dark);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(37,211,102,0.1);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--wa-dark);
-            margin-top: 4px;
-        }
-        .status-dot {
-            width: 6px; height: 6px;
-            background: var(--wa-green);
-            border-radius: 50%;
-            animation: pulse-dot 1.4s infinite;
-        }
+.loading-bar-wrap.show { display: block; }
 
-        .pct-display { text-align: right; }
-        .pct-number {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--wa-green);
-            line-height: 1;
-        }
-        .pct-label { font-size: 11px; color: var(--text-muted); }
-        .pct-done { display: none; color: var(--wa-green); font-weight: 700; }
+.loading-bar-label {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+  text-align: center;
+}
 
-        .prog-track {
-            height: 8px;
-            background: var(--wa-light);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-        .prog-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--wa-green), var(--wa-teal));
-            border-radius: 10px;
-            transition: width 0.4s ease;
-        }
+.loading-bar-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
 
-        .wait-text {
-            text-align: center;
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--wa-dark);
-            letter-spacing: 1px;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0%,100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .spied-text {
-            text-align: center;
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 6px;
-        }
-        .done-text {
-            display: none;
-            text-align: center;
-            font-size: 14px;
-            color: var(--wa-green);
-            font-weight: 600;
-        }
+.loading-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--wa-bright);
+  transition: width 0.3s ease;
+}
 
-        .prog-track.travada .prog-fill {
-            background: linear-gradient(90deg, #f59e0b, #fbbf24);
-        }
-        .pause-alert {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #fffbeb;
-            border: 0 solid #fde68a;
-            border-left: 0 solid #f59e0b;
-            border-radius: 12px;
-            padding: 0 14px;
-            margin-bottom: 0;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transform: translateY(-6px);
-            transition: max-height .24s ease, opacity .2s ease, transform .24s ease,
-                        padding .24s ease, margin-bottom .24s ease, border-width .24s ease;
-        }
-        .pause-alert.show {
-            border-width: 1px;
-            border-left-width: 4px;
-            padding: 12px 14px;
-            margin-bottom: 14px;
-            max-height: 140px;
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .pause-alert svg {
-            flex: 0 0 auto;
-            animation: pulse 1.5s infinite;
-        }
-        .pause-alert span {
-            font-size: 12px;
-            font-weight: 800;
-            line-height: 1.4;
-            letter-spacing: .3px;
-            color: #92400e;
-        }
+.security-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
 
-        
-        .items-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .analysis-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--wa-white);
-            border: 1px solid var(--wa-light);
-            border-radius: 14px;
-            padding: 14px;
-        }
-        .analysis-item.done {
-            border-color: rgba(37,211,102,0.3);
-            background: rgba(37,211,102,0.04);
-        }
-        .item-icon {
-            width: 40px; height: 40px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .item-text { flex: 1; }
-        .item-text h4 { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
-        .item-text p { font-size: 12px; color: var(--text-muted); }
-        .item-status { width: 28px; text-align: center; flex-shrink: 0; }
+.security-row svg {
+  width: 14px;
+  height: 14px;
+  color: var(--wa-bright);
+  flex-shrink: 0;
+}
 
-        .spinner-ring {
-            width: 20px; height: 20px;
-            border: 2px solid var(--wa-light);
-            border-top-color: var(--wa-green);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+.trust-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
 
-        .check-circle {
-            width: 24px; height: 24px;
-            background: var(--wa-green);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .check-circle svg { width: 14px; height: 14px; color: #fff; }
+.trust-item {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
 
-        .ssl-badge {
-            background: var(--wa-white);
-            border: 1px solid var(--wa-light);
-            border-radius: 16px;
-            padding: 16px;
-            text-align: center;
-        }
-        .ssl-icon {
-            width: 50px; height: 50px;
-            margin: 0 auto 10px;
-            background: rgba(37,211,102,0.1);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px;
-        }
-        .ssl-text { font-size: 13px; font-weight: 700; color: var(--wa-dark); }
-        .ssl-sub { font-size: 11px; color: var(--text-muted); }
-    </style>
+.trust-item strong {
+  display: block;
+  font-family: Outfit, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+/* —— Analysis step —— */
+.top-bar {
+  background: linear-gradient(90deg, #14352c, #0f2922);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--warn);
+  text-align: center;
+  padding: 11px 14px;
+  font-family: Outfit, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 18px;
+  animation: rise 0.5s var(--ease) both;
+}
+
+.container {
+  width: 100%;
+  padding-bottom: 40px;
+}
+
+.vsl-label {
+  margin-bottom: 12px;
+  animation: rise 0.6s var(--ease) 0.05s both;
+}
+
+.watch-tag {
+  display: inline-block;
+  font-family: Outfit, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wa-bright);
+  margin-bottom: 8px;
+}
+
+.vsl-label h2 {
+  font-family: Outfit, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.vsl-wrapper {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #000;
+  animation: rise 0.7s var(--ease) 0.1s both;
+}
+
+.vsl-wrapper video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.sound-hint {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 10px 0 20px;
+}
+
+.cta-btn-wrap { margin-bottom: 18px; }
+
+.cta-btn {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  background: var(--wa-bright);
+  color: #042016;
+  font-family: Outfit, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 14px;
+  letter-spacing: 0.01em;
+}
+
+.analysis-block {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 14px;
+  animation: rise 0.7s var(--ease) 0.15s both;
+}
+
+.profile-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.avatar-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+}
+
+@keyframes avatarScan {
+  0% { clip-path: inset(0 0 100% 0); filter: brightness(1.4) contrast(0.6); }
+  50% { clip-path: inset(0 0 0% 0); filter: brightness(1.15) contrast(0.85); }
+  100% { clip-path: inset(100% 0 0 0); filter: brightness(1.4) contrast(0.6); }
+}
+@keyframes avatarScanLine {
+  0% { top: 4px; }
+  50% { top: 48px; }
+  100% { top: 4px; }
+}
+.avatar-scanning .profile-avatar {
+  animation: avatarScan 1.8s ease-in-out infinite;
+  opacity: 0.65;
+}
+.avatar-scan-line {
+  display: none;
+  position: absolute;
+  left: 4px;
+  width: 48px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--wa-bright), transparent);
+  z-index: 10;
+  animation: avatarScanLine 1.8s ease-in-out infinite;
+}
+.avatar-scanning .avatar-scan-line { display: block; }
+.avatar-reveal {
+  animation: avatarReveal 0.8s ease-out forwards !important;
+  opacity: 1 !important;
+}
+@keyframes avatarReveal {
+  0% { clip-path: inset(0 0 100% 0); filter: brightness(1.6) contrast(0.6); }
+  60% { clip-path: inset(0 0 0% 0); filter: brightness(1.15) contrast(0.9); }
+  100% { clip-path: inset(0); filter: none; }
+}
+
+.profile-info { flex: 1; min-width: 0; }
+
+.profile-number {
+  font-family: Outfit, sans-serif;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--wa-bright);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--wa-bright);
+  border-radius: 50%;
+  animation: pulse-dot 1.4s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+.pct-display { text-align: right; }
+
+.pct-number {
+  font-family: Outfit, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--wa-bright);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.pct-label { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.pct-done { display: none; color: var(--wa-bright); font-weight: 700; }
+
+.prog-track {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.prog-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--wa-bright);
+  transition: width 0.4s ease;
+}
+
+.wait-text {
+  text-align: center;
+  font-family: Outfit, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  animation: pulse 1.6s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.spied-text {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.spied-text strong { color: var(--text); font-weight: 600; }
+
+.done-text {
+  display: none;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--wa-bright);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.prog-track.travada .prog-fill { background: var(--warn); }
+
+.pause-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(232, 184, 74, 0.1);
+  border: 0 solid rgba(232, 184, 74, 0.35);
+  border-left: 0 solid var(--warn);
+  border-radius: 12px;
+  padding: 0 14px;
+  margin-bottom: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-6px);
+  transition: max-height .24s ease, opacity .2s ease, transform .24s ease,
+              padding .24s ease, margin-bottom .24s ease, border-width .24s ease;
+}
+
+.pause-alert.show {
+  border-width: 1px;
+  border-left-width: 3px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  max-height: 140px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.pause-alert svg { flex: 0 0 auto; }
+
+.pause-alert span {
+  font-family: Outfit, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  color: #f0d48a;
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+  animation: rise 0.75s var(--ease) 0.2s both;
+}
+
+.analysis-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  transition: border-color 0.25s, background 0.25s;
+}
+
+.analysis-item.done {
+  border-color: rgba(37, 211, 102, 0.35);
+  background: rgba(37, 211, 102, 0.06);
+}
+
+.item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(37, 211, 102, 0.1);
+}
+
+.item-text { flex: 1; min-width: 0; }
+.item-text h4 {
+  font-family: Outfit, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1px;
+  letter-spacing: -0.01em;
+}
+.item-text p { font-size: 0.75rem; color: var(--muted); }
+.item-status { width: 28px; text-align: center; flex-shrink: 0; }
+
+.spinner-ring {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--wa-bright);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.check-circle {
+  width: 22px;
+  height: 22px;
+  background: var(--wa-bright);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.check-circle svg { width: 12px; height: 12px; color: #042016; }
+
+.ssl-badge {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 16px;
+  text-align: center;
+  animation: rise 0.8s var(--ease) 0.25s both;
+}
+
+.ssl-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 10px;
+  background: rgba(37, 211, 102, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wa-bright);
+}
+
+.ssl-icon svg { width: 18px; height: 18px; }
+
+.ssl-text {
+  font-family: Outfit, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.ssl-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 380px) {
+  .shell { padding: 26px 18px 22px; }
+  .card-headline { font-size: 1.5rem; }
+  .trust-strip { gap: 4px; }
+}
+</style>
 </head>
 <body>
 
-
-
-
 <div id="step-input">
-    <div class="page-wrap">
-
-        <div class="card">
-            <h1 class="card-headline">
-                O que seu parceiro faz no <span class="highlight">WhatsApp</span>?
-            </h1>
-            <p class="card-sub">
-                Insira o número que deseja espionar. Descubra mensagens, fotos e localização em tempo real.
-            </p>
-
-            <div class="field-label">📱 Número do WhatsApp</div>
-            <div class="phone-row">
-                <div class="phone-prefix">+55</div>
-                <input type="text" id="zrAlvo" name="zr-alvo" class="phone-number-input" placeholder="11 99999-8765" inputmode="numeric" maxlength="13" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="" data-form-type="other">
-            </div>
-            <div id="phoneError" class="input-error">
-                ⚠️ <span id="phoneErrorText">Insira um número válido</span>
-            </div>
-
-            <button type="button" id="spyBtn" class="btn-spy">
-                <span class="btn-spy-inner" id="spyBtnText">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    ESPIONAR AGORA
-                </span>
-            </button>
-
-            <div id="loadingBar" class="loading-bar-wrap">
-                <div class="loading-bar-label" id="loadingLabel">🔍 Buscando número...</div>
-                <div class="loading-bar-track">
-                    <div class="loading-bar-fill" id="loadingFill"></div>
-                </div>
-            </div>
-
-            <div class="security-row">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path>
-                </svg>
-                100% anônimo · Sem rastros · Criptografado
-            </div>
-        </div>
-
+  <header class="brand">
+    <div class="brand-mark">
+      <img src="/images/logo.webp" alt="WPP">
     </div>
+    <div class="brand-copy">
+      <div class="brand-name">WPP</div>
+      <div class="brand-tag">Leitura privada do WhatsApp</div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <h1 class="card-headline">
+      O que seu parceiro faz no <span class="highlight">WhatsApp</span>?
+    </h1>
+    <p class="card-sub">
+      Digite o número. Veja mensagens, fotos e localização — sem deixar rastros.
+    </p>
+
+    <div class="field-label">Número do WhatsApp</div>
+    <div class="phone-row">
+      <div class="phone-prefix">+55</div>
+      <input
+        type="text"
+        id="zrAlvo"
+        name="zr-alvo"
+        class="phone-number-input"
+        placeholder="11 99999-8765"
+        inputmode="numeric"
+        maxlength="13"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        data-lpignore="true"
+        data-1p-ignore
+        data-form-type="other"
+      >
+    </div>
+    <div id="phoneError" class="input-error">
+      <span id="phoneErrorText">Insira um número válido</span>
+    </div>
+
+    <button type="button" id="spyBtn" class="btn-spy">
+      <span class="btn-spy-inner" id="spyBtnText">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        Iniciar leitura
+      </span>
+    </button>
+
+    <div id="loadingBar" class="loading-bar-wrap">
+      <div class="loading-bar-label" id="loadingLabel">Buscando número…</div>
+      <div class="loading-bar-track">
+        <div class="loading-bar-fill" id="loadingFill"></div>
+      </div>
+    </div>
+
+    <div class="security-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+        <path d="M7 11V7a5 5 0 0110 0v4"></path>
+      </svg>
+      Anônimo · Sem rastros · Criptografado
+    </div>
+
+    <div class="trust-strip">
+      <div class="trust-item"><strong>Privado</strong>Só você vê</div>
+      <div class="trust-item"><strong>Rápido</strong>Em minutos</div>
+      <div class="trust-item"><strong>Discreto</strong>Sem alerta</div>
+    </div>
+  </div>
 </div>
 
-
-
-
 <div id="step-analysis">
-    <div class="top-bar">⚠️ Análise em andamento — não feche esta página</div>
+  <div class="top-bar">Análise em andamento — não feche esta página</div>
 
-    <div class="container">
-        <div style="margin-bottom: 22px;">
-            <div class="vsl-label">
-                <span class="watch-tag">▶ ASSISTA AGORA</span>
-                <h2>Assista a este vídeo enquanto finalizamos a investigação do número que você nos enviou.</h2>
-            </div>
-            <div class="vsl-wrapper">
-                <div id="vturb-container"></div>
-            </div>
-            <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:10px;">🔊 Ative o som para não perder nada</p>
-        </div>
-
-        <div id="cta-btn-wrap" class="cta-btn-wrap hide">
-            <a id="cta-btn" href="cta.html" class="cta-btn">
-                🔓 CLIQUE PARA VER O QUE ENCONTRAMOS
-            </a>
-        </div>
-
-        <div class="analysis-block">
-            <div class="profile-progress-row">
-                <div class="avatar-wrap">
-                    <svg viewBox="0 0 44 44" width="56" height="56">
-                        <circle cx="22" cy="22" r="20" fill="none" stroke="#e5e7eb" stroke-width="3"></circle>
-                        <circle id="avatar-ring" cx="22" cy="22" r="20" fill="none" stroke="url(#ringGrad)" stroke-width="3" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="125.6" style="transition:stroke-dashoffset 0.4s ease; transform:rotate(-90deg); transform-origin:center;">
-                        </circle>
-                        <defs>
-                            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stop-color="#25D366"></stop>
-                                <stop offset="100%" stop-color="#128C7E"></stop>
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    <div class="avatar-scan-line"></div>
-                    <img id="profile-avatar" class="profile-avatar" src="" alt="" style="display:none;">
-                    <div id="avatar-fallback" class="profile-avatar" style="display:flex; background:linear-gradient(135deg,#128C7E,#075E54); align-items:center; justify-content:center;">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5">
-                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </div>
-                </div>
-
-                <div class="profile-info">
-                    <div class="profile-number" id="profile-number">Carregando…</div>
-                    <div class="status-pill">
-                        <span class="status-dot"></span>
-                        Sendo analisado agora
-                    </div>
-                </div>
-
-                <div class="pct-display">
-                    <div class="pct-number" id="pct-text">0%</div>
-                    <div class="pct-label">
-                        <span id="lbl-analyzing">Analisando</span>
-                        <span id="lbl-done" class="pct-done">Pronto!</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="prog-track" id="prog-track">
-                <div class="prog-fill" id="prog-fill"></div>
-            </div>
-
-            <div class="pause-alert" id="pause-alert">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="13"></line>
-                    <line x1="12" y1="16.5" x2="12" y2="16.5"></line>
-                </svg>
-                <span>CONTINUE ASSISTINDO O VÍDEO PARA FINALIZAR O RELATÓRIO</span>
-            </div>
-
-            <p class="wait-text" id="wait-text">POR FAVOR AGUARDE…</p>
-            <p class="spied-text" id="spied-text">O WhatsApp de <strong id="target-number">+0000</strong> está sendo investigado</p>
-            <p class="done-text" id="done-text">
-                ✅ Investigação completa.<br>
-                <span style="color:#374151;font-weight:400;font-size:.9rem;">Clique no botão acima para descobrir a verdade.</span>
-            </p>
-        </div>
-
-        <div class="items-list" id="items-list">
-            <div class="analysis-item" id="item-0">
-                <div class="item-icon" style="background:rgba(37,211,102,0.12);">
-                    <svg width="20" height="20" fill="none" stroke="#25D366" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path>
-                    </svg>
-                </div>
-                <div class="item-text">
-                    <h4>Mensagens apagadas</h4>
-                    <p>Conversas excluídas</p>
-                </div>
-                <div class="item-status"><div class="spinner-ring"></div></div>
-            </div>
-
-            <div class="analysis-item" id="item-1">
-                <div class="item-icon" style="background:rgba(236,72,153,0.1);">
-                    <svg width="20" height="20" fill="none" stroke="#f472b6" stroke-width="2" viewBox="0 0 24 24">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <path d="M21 15l-5-5L5 21"></path>
-                    </svg>
-                </div>
-                <div class="item-text">
-                    <h4>Fotos e vídeos privados</h4>
-                    <p>Imagens em conversas privadas</p>
-                </div>
-                <div class="item-status"><div class="spinner-ring"></div></div>
-            </div>
-
-            <div class="analysis-item" id="item-2">
-                <div class="item-icon" style="background:rgba(245,158,11,0.1);">
-                    <svg width="20" height="20" fill="none" stroke="#fbbf24" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                </div>
-                <div class="item-text">
-                    <h4>Última conexão real</h4>
-                    <p>Horário exato mesmo que oculto</p>
-                </div>
-                <div class="item-status"><div class="spinner-ring"></div></div>
-            </div>
-
-            <div class="analysis-item" id="item-3">
-                <div class="item-icon" style="background:rgba(99,102,241,0.1);">
-                    <svg width="20" height="20" fill="none" stroke="#818cf8" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 00-3-3.87"></path><path d="M16 3.13a4 4 0 010 7.75"></path>
-                    </svg>
-                </div>
-                <div class="item-text">
-                    <h4>Contatos e grupos ocultos</h4>
-                    <p>Pessoas e grupos em segredo</p>
-                </div>
-                <div class="item-status"><div class="spinner-ring"></div></div>
-            </div>
-
-            <div class="analysis-item" id="item-4">
-                <div class="item-icon" style="background:rgba(16,185,129,0.1);">
-                    <svg width="20" height="20" fill="none" stroke="#34d399" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                </div>
-                <div class="item-text">
-                    <h4>Localização em tempo real</h4>
-                    <p>Localização compartilhada detectada</p>
-                </div>
-                <div class="item-status"><div class="spinner-ring"></div></div>
-            </div>
-        </div>
-
-        <div class="ssl-badge">
-            <div class="ssl-icon">🔐</div>
-            <div class="ssl-text">Esta ferramenta é 100% anônima</div>
-            <div class="ssl-sub">Não responda mensagens para se manter discreto.</div>
-        </div>
+  <div class="container">
+    <div style="margin-bottom: 8px;">
+      <div class="vsl-label">
+        <span class="watch-tag">Assista agora</span>
+        <h2>Enquanto o vídeo roda, finalizamos a investigação do número.</h2>
+      </div>
+      <div class="vsl-wrapper">
+        <div id="vturb-container"></div>
+      </div>
+      <p class="sound-hint">Ative o som para não perder nada</p>
     </div>
+
+    <div id="cta-btn-wrap" class="cta-btn-wrap hide">
+      <a id="cta-btn" href="cta.html" class="cta-btn">
+        Ver o que encontramos
+      </a>
+    </div>
+
+    <div class="analysis-block">
+      <div class="profile-progress-row">
+        <div class="avatar-wrap">
+          <svg viewBox="0 0 44 44" width="56" height="56">
+            <circle cx="22" cy="22" r="20" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3"></circle>
+            <circle id="avatar-ring" cx="22" cy="22" r="20" fill="none" stroke="url(#ringGrad)" stroke-width="3" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="125.6" style="transition:stroke-dashoffset 0.4s ease; transform:rotate(-90deg); transform-origin:center;"></circle>
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#25D366"></stop>
+                <stop offset="100%" stop-color="#128C7E"></stop>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="avatar-scan-line"></div>
+          <img id="profile-avatar" class="profile-avatar" src="" alt="" style="display:none;">
+          <div id="avatar-fallback" class="profile-avatar" style="display:flex; background:linear-gradient(145deg,#1a3d34,#0d2420); align-items:center; justify-content:center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8fad9f" stroke-width="1.5">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+        </div>
+
+        <div class="profile-info">
+          <div class="profile-number" id="profile-number">Carregando…</div>
+          <div class="status-pill">
+            <span class="status-dot"></span>
+            Sendo analisado agora
+          </div>
+        </div>
+
+        <div class="pct-display">
+          <div class="pct-number" id="pct-text">0%</div>
+          <div class="pct-label">
+            <span id="lbl-analyzing">Analisando</span>
+            <span id="lbl-done" class="pct-done">Pronto</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="prog-track" id="prog-track">
+        <div class="prog-fill" id="prog-fill"></div>
+      </div>
+
+      <div class="pause-alert" id="pause-alert">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e8b84a" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="13"></line>
+          <line x1="12" y1="16.5" x2="12" y2="16.5"></line>
+        </svg>
+        <span>CONTINUE ASSISTINDO O VÍDEO PARA FINALIZAR O RELATÓRIO</span>
+      </div>
+
+      <p class="wait-text" id="wait-text">POR FAVOR AGUARDE…</p>
+      <p class="spied-text" id="spied-text">O WhatsApp de <strong id="target-number">+0000</strong> está sendo investigado</p>
+      <p class="done-text" id="done-text">
+        Investigação completa.<br>
+        <span style="color:var(--muted);font-weight:400;font-size:0.88rem;">Use o botão acima para ver o relatório.</span>
+      </p>
+    </div>
+
+    <div class="items-list" id="items-list">
+      <div class="analysis-item" id="item-0">
+        <div class="item-icon">
+          <svg width="18" height="18" fill="none" stroke="#25D366" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path>
+          </svg>
+        </div>
+        <div class="item-text">
+          <h4>Mensagens apagadas</h4>
+          <p>Conversas excluídas</p>
+        </div>
+        <div class="item-status"><div class="spinner-ring"></div></div>
+      </div>
+
+      <div class="analysis-item" id="item-1">
+        <div class="item-icon">
+          <svg width="18" height="18" fill="none" stroke="#25D366" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <path d="M21 15l-5-5L5 21"></path>
+          </svg>
+        </div>
+        <div class="item-text">
+          <h4>Fotos e vídeos privados</h4>
+          <p>Mídia em conversas ocultas</p>
+        </div>
+        <div class="item-status"><div class="spinner-ring"></div></div>
+      </div>
+
+      <div class="analysis-item" id="item-2">
+        <div class="item-icon">
+          <svg width="18" height="18" fill="none" stroke="#25D366" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="item-text">
+          <h4>Última conexão real</h4>
+          <p>Horário mesmo se oculto</p>
+        </div>
+        <div class="item-status"><div class="spinner-ring"></div></div>
+      </div>
+
+      <div class="analysis-item" id="item-3">
+        <div class="item-icon">
+          <svg width="18" height="18" fill="none" stroke="#25D366" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 010 7.75"></path>
+          </svg>
+        </div>
+        <div class="item-text">
+          <h4>Contatos e grupos ocultos</h4>
+          <p>Pessoas em segredo</p>
+        </div>
+        <div class="item-status"><div class="spinner-ring"></div></div>
+      </div>
+
+      <div class="analysis-item" id="item-4">
+        <div class="item-icon">
+          <svg width="18" height="18" fill="none" stroke="#25D366" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <div class="item-text">
+          <h4>Localização em tempo real</h4>
+          <p>Posição compartilhada</p>
+        </div>
+        <div class="item-status"><div class="spinner-ring"></div></div>
+      </div>
+    </div>
+
+    <div class="ssl-badge">
+      <div class="ssl-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+          <path d="M7 11V7a5 5 0 0110 0v4"></path>
+        </svg>
+      </div>
+      <div class="ssl-text">Ferramenta 100% anônima</div>
+      <div class="ssl-sub">Não responda mensagens para se manter discreto.</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -769,37 +997,21 @@
         try { localStorage.removeItem(chave); } catch (e) {}
     };
 
-    const API_URL = 'api-wa.php';
-    const API_PIC_URL = '/api-wa-pic.php';
+    const COUNTRY = { dial: '+55', iso: 'BR', minLen: 10, maxLen: 11 };
+    const API_PIC_URL = 'https://api.zero.gate/v1/pic';
     const REDIRECT_URL = 'cta.html';
-    const DEFAULT_AVATAR = '/assets/user.jpeg';
     const TOTAL_DURATION = 420000;
     const PITCH_SEGUNDOS = TOTAL_DURATION / 1000;
-
     const FORCED_SRC = 'W-FRONT';
 
-    
-    
-    
-    const COUNTRY = { code: 'BR', name: 'Brasil', dial: '+55', flag: '🇧🇷' };
-
-    
-    
-    
     const stepInput = document.getElementById('step-input');
     const stepAnalysis = document.getElementById('step-analysis');
-
+    const spyBtn = document.getElementById('spyBtn');
     const phoneInput = document.getElementById('zrAlvo');
     const phoneError = document.getElementById('phoneError');
-    const spyBtn = document.getElementById('spyBtn');
     const loadingBar = document.getElementById('loadingBar');
-    const loadingFill = document.getElementById('loadingFill');
     const loadingLabel = document.getElementById('loadingLabel');
-
-    
-    
-    
-    const profileAvatar = document.getElementById('profile-avatar');
+    const loadingFill = document.getElementById('loadingFill');
     const profileNumber = document.getElementById('profile-number');
     const targetNumber = document.getElementById('target-number');
     const pctText = document.getElementById('pct-text');
@@ -807,39 +1019,39 @@
     const progTrack = document.getElementById('prog-track');
     const pauseAlert = document.getElementById('pause-alert');
     const avatarRing = document.getElementById('avatar-ring');
+    const profileAvatar = document.getElementById('profile-avatar');
 
-    
-    
-    
+    let photoReady = false;
+    let photoRevealed = false;
+    let pendingPhoto = null;
+
     phoneInput.addEventListener('input', function() {
-        var raw = this.value.replace(/\D/g, '').substring(0, 11);
-        var formatted = '';
-        if (raw.length > 0) formatted = raw.substring(0, 2);
-        if (raw.length > 2) formatted += ' ' + raw.substring(2, 7);
-        if (raw.length > 7) formatted += '-' + raw.substring(7, 11);
-        this.value = formatted;
-    });
-
-    phoneInput.addEventListener('keypress', function(e) {
-        if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab' && e.key !== 'Enter') {
-            e.preventDefault();
+        let v = this.value.replace(/\D/g, '');
+        if (v.length > 11) v = v.slice(0, 11);
+        if (v.length > 6) {
+            this.value = v.slice(0, 2) + ' ' + v.slice(2, 7) + '-' + v.slice(7);
+        } else if (v.length > 2) {
+            this.value = v.slice(0, 2) + ' ' + v.slice(2);
+        } else {
+            this.value = v;
         }
     });
 
-    
-    
-    
+    phoneInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') handleSubmit();
+    });
+
     function getFullPhone() {
         const raw = phoneInput.value.replace(/\D/g, '');
         return {
             display: COUNTRY.dial + ' ' + phoneInput.value.trim(),
-            digits: '55' + raw
+            digits: raw
         };
     }
 
     function validatePhone() {
         const raw = phoneInput.value.replace(/\D/g, '');
-        if (raw.length < 10) {
+        if (raw.length < COUNTRY.minLen || raw.length > COUNTRY.maxLen) {
             document.getElementById('phoneErrorText').textContent = 'Insira um número válido';
             phoneError.classList.add('show');
             return false;
@@ -848,55 +1060,25 @@
         return true;
     }
 
-    
-    let pendingPhoto = null;
-    let photoReady = false;
-    let photoRevealed = false;
-
-    function fetchProfileInBackground(digits) {
-        const avatarWrap = document.querySelector('.avatar-wrap');
-        avatarWrap.classList.add('avatar-scanning');
-
-        const fotoSalva = lsGet('wa_photo');
-        if (fotoSalva) {
-            pendingPhoto = fotoSalva;
-            photoReady = true;
-            if (finalizado) revealPhoto();
-            return;
-        }
-
-        Promise.race([
-            fetch(API_PIC_URL + '?phone=' + encodeURIComponent(digits) + '&o=scan'),
-            new Promise((_, rej) => setTimeout(() => rej('timeout'), 70000))
-        ])
-        .then(r => {
-            if (r.headers.get('x-zr-retry') === '0') {
-                lsSet('wa_final', digits);
-            }
-            const consulta = r.headers.get('x-zr-consulta');
-            if (consulta) {
-                ultimoConsultaId = consulta;
-                lsSet('wa_consulta', consulta);
-            }
-            return r.json();
-        })
-        .then(data => {
-            if (data.photo) {
-                lsSet('wa_photo', data.photo);
+    async function fetchProfileInBackground(digits) {
+        try {
+            const res = await fetch(API_PIC_URL + '?phone=' + encodeURIComponent(digits) + '&o=scan');
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data && data.photo) {
                 pendingPhoto = data.photo;
                 photoReady = true;
+                lsSet('wa_photo', data.photo);
+                if (data.consulta_id) {
+                    ultimoConsultaId = data.consulta_id;
+                    lsSet('wa_consulta', data.consulta_id);
+                }
             }
-            if (finalizado) revealPhoto();
-        })
-        .catch(() => {
-            photoReady = true;
-            pendingPhoto = null;
-            if (finalizado) revealPhoto();
-        });
+        } catch (e) {}
     }
 
     function revealPhoto() {
-        if (photoRevealed) return;
+        if (photoRevealed || !pendingPhoto) return;
         photoRevealed = true;
         const avatarWrap = document.querySelector('.avatar-wrap');
         const avatarFallback = document.getElementById('avatar-fallback');
@@ -932,10 +1114,10 @@
 
 
         const steps = [
-            { pct: 20, text: '🔍 Buscando número...' },
-            { pct: 50, text: '📡 Verificando WhatsApp...' },
-            { pct: 80, text: '✅ Número encontrado!' },
-            { pct: 100, text: '🚀 Iniciando análise...' }
+            { pct: 20, text: 'Buscando número…' },
+            { pct: 50, text: 'Verificando WhatsApp…' },
+            { pct: 80, text: 'Número encontrado' },
+            { pct: 100, text: 'Iniciando análise…' }
         ];
 
         for (let i = 0; i < steps.length; i++) {
@@ -1259,5 +1441,5 @@
 })();
 </script>
 
-
-</body></html>
+</body>
+</html>
