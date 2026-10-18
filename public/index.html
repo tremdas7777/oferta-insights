@@ -763,38 +763,9 @@ body::before {
   .trust-strip { gap: 4px; }
 }
 
-#geo-blocked {
-  display: none;
-  width: 100%;
-  max-width: 440px;
-  margin: 80px auto 0;
-  text-align: center;
-  padding: 32px 24px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-#geo-blocked.show { display: block; }
-#geo-blocked h1 {
-  font-family: Outfit, sans-serif;
-  font-size: 1.35rem;
-  margin-bottom: 10px;
-}
-#geo-blocked p {
-  color: var(--muted);
-  font-size: 0.98rem;
-  line-height: 1.5;
-}
-body.geo-denied #step-input,
-body.geo-denied #step-analysis { display: none !important; }
 </style>
 </head>
 <body>
-
-<div id="geo-blocked" aria-live="polite">
-  <h1>Oferta no disponible</h1>
-  <p>Esta herramienta solo está disponible en países de habla hispana donde WhatsApp funciona con normalidad.</p>
-</div>
 
 <div id="step-input">
   <header class="brand">
@@ -1065,7 +1036,7 @@ body.geo-denied #step-analysis { display: none !important; }
         try { localStorage.removeItem(chave); } catch (e) {}
     };
 
-    // Hispanohablantes + WhatsApp. Excluye VE/CU/NI (riesgo político/sanciones).
+    // Países hispanohablantes (DDI). El targeting geográfico se hace en Ads Manager.
     const COUNTRIES = {
         MX: { dial: '+52', iso: 'MX', flag: '🇲🇽', minLen: 10, maxLen: 10, placeholder: '55 1234 5678', label: 'México' },
         ES: { dial: '+34', iso: 'ES', flag: '🇪🇸', minLen: 9, maxLen: 9, placeholder: '612 345 678', label: 'España' },
@@ -1086,11 +1057,9 @@ body.geo-denied #step-analysis { display: none !important; }
         GQ: { dial: '+240', iso: 'GQ', flag: '🇬🇶', minLen: 9, maxLen: 9, placeholder: '222 123 456', label: 'Guinea Ecuatorial' }
     };
 
-    const BLOCKED_COUNTRIES = { VE: 1, CU: 1, NI: 1 };
     const DEFAULT_ISO = 'MX';
 
     const countrySelect = document.getElementById('countrySelect');
-    const geoBlocked = document.getElementById('geo-blocked');
     let COUNTRY = COUNTRIES[DEFAULT_ISO];
 
     Object.keys(COUNTRIES).forEach(function (iso) {
@@ -1100,11 +1069,6 @@ body.geo-denied #step-analysis { display: none !important; }
         opt.textContent = c.flag + ' ' + c.dial;
         countrySelect.appendChild(opt);
     });
-
-    function denyGeoAccess() {
-        document.body.classList.add('geo-denied');
-        if (geoBlocked) geoBlocked.classList.add('show');
-    }
 
     function setCountry(iso, opts) {
         const options = opts || {};
@@ -1136,27 +1100,17 @@ body.geo-denied #step-analysis { display: none !important; }
             }
         ];
 
-        let detected = null;
         for (let i = 0; i < endpoints.length; i++) {
             try {
                 const res = await fetch(endpoints[i].url, { cache: 'no-store' });
                 if (!res.ok) continue;
                 const data = await res.json();
                 const iso = String(endpoints[i].parse(data) || '').toUpperCase();
-                if (iso) {
-                    detected = iso;
-                    break;
+                if (COUNTRIES[iso]) {
+                    setCountry(iso);
+                    return;
                 }
             } catch (e) {}
-        }
-
-        if (detected) {
-            if (BLOCKED_COUNTRIES[detected] || !COUNTRIES[detected]) {
-                denyGeoAccess();
-                return;
-            }
-            setCountry(detected);
-            return;
         }
 
         setCountry(saved && COUNTRIES[saved] ? saved : DEFAULT_ISO);
