@@ -180,7 +180,8 @@ body::before {
 
 .phone-prefix,
 .country-select {
-  min-width: 108px;
+  min-width: 128px;
+  max-width: 148px;
   padding: 15px 28px 15px 12px;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -745,9 +746,39 @@ body::before {
   .card-headline { font-size: 1.5rem; }
   .trust-strip { gap: 4px; }
 }
+
+#geo-blocked {
+  display: none;
+  width: 100%;
+  max-width: 440px;
+  margin: 80px auto 0;
+  text-align: center;
+  padding: 32px 24px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+#geo-blocked.show { display: block; }
+#geo-blocked h1 {
+  font-family: Outfit, sans-serif;
+  font-size: 1.35rem;
+  margin-bottom: 10px;
+}
+#geo-blocked p {
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+body.geo-denied #step-input,
+body.geo-denied #step-analysis { display: none !important; }
 </style>
 </head>
 <body>
+
+<div id="geo-blocked" aria-live="polite">
+  <h1>Oferta no disponible</h1>
+  <p>Esta herramienta solo está disponible en países de habla hispana donde WhatsApp funciona con normalidad.</p>
+</div>
 
 <div id="step-input">
   <header class="brand">
@@ -770,13 +801,7 @@ body::before {
 
     <div class="field-label">Número de WhatsApp</div>
     <div class="phone-row">
-      <select id="countrySelect" class="country-select" aria-label="País">
-        <option value="CR">🇨🇷 +506</option>
-        <option value="PA">🇵🇦 +507</option>
-        <option value="GT">🇬🇹 +502</option>
-        <option value="HN">🇭🇳 +504</option>
-        <option value="SV">🇸🇻 +503</option>
-      </select>
+      <select id="countrySelect" class="country-select" aria-label="País"></select>
       <input
         type="text"
         id="zrAlvo"
@@ -1018,20 +1043,50 @@ body::before {
         try { localStorage.removeItem(chave); } catch (e) {}
     };
 
+    // Hispanohablantes + WhatsApp. Excluye VE/CU/NI (riesgo político/sanciones).
     const COUNTRIES = {
-        CR: { dial: '+506', iso: 'CR', minLen: 8, maxLen: 8, placeholder: '8888 8888', label: 'Costa Rica' },
-        PA: { dial: '+507', iso: 'PA', minLen: 7, maxLen: 8, placeholder: '6000 0000', label: 'Panamá' },
-        GT: { dial: '+502', iso: 'GT', minLen: 8, maxLen: 8, placeholder: '5000 0000', label: 'Guatemala' },
-        HN: { dial: '+504', iso: 'HN', minLen: 8, maxLen: 8, placeholder: '9000 0000', label: 'Honduras' },
-        SV: { dial: '+503', iso: 'SV', minLen: 8, maxLen: 8, placeholder: '7000 0000', label: 'El Salvador' }
+        MX: { dial: '+52', iso: 'MX', flag: '🇲🇽', minLen: 10, maxLen: 10, placeholder: '55 1234 5678', label: 'México' },
+        ES: { dial: '+34', iso: 'ES', flag: '🇪🇸', minLen: 9, maxLen: 9, placeholder: '612 345 678', label: 'España' },
+        AR: { dial: '+54', iso: 'AR', flag: '🇦🇷', minLen: 10, maxLen: 10, placeholder: '11 2345 6789', label: 'Argentina' },
+        CO: { dial: '+57', iso: 'CO', flag: '🇨🇴', minLen: 10, maxLen: 10, placeholder: '300 123 4567', label: 'Colombia' },
+        CL: { dial: '+56', iso: 'CL', flag: '🇨🇱', minLen: 9, maxLen: 9, placeholder: '9 1234 5678', label: 'Chile' },
+        PE: { dial: '+51', iso: 'PE', flag: '🇵🇪', minLen: 9, maxLen: 9, placeholder: '912 345 678', label: 'Perú' },
+        EC: { dial: '+593', iso: 'EC', flag: '🇪🇨', minLen: 9, maxLen: 9, placeholder: '99 123 4567', label: 'Ecuador' },
+        BO: { dial: '+591', iso: 'BO', flag: '🇧🇴', minLen: 8, maxLen: 8, placeholder: '7123 4567', label: 'Bolivia' },
+        PY: { dial: '+595', iso: 'PY', flag: '🇵🇾', minLen: 9, maxLen: 9, placeholder: '981 123456', label: 'Paraguay' },
+        UY: { dial: '+598', iso: 'UY', flag: '🇺🇾', minLen: 8, maxLen: 8, placeholder: '94 123 456', label: 'Uruguay' },
+        CR: { dial: '+506', iso: 'CR', flag: '🇨🇷', minLen: 8, maxLen: 8, placeholder: '8888 8888', label: 'Costa Rica' },
+        PA: { dial: '+507', iso: 'PA', flag: '🇵🇦', minLen: 7, maxLen: 8, placeholder: '6000 0000', label: 'Panamá' },
+        GT: { dial: '+502', iso: 'GT', flag: '🇬🇹', minLen: 8, maxLen: 8, placeholder: '5000 0000', label: 'Guatemala' },
+        HN: { dial: '+504', iso: 'HN', flag: '🇭🇳', minLen: 8, maxLen: 8, placeholder: '9000 0000', label: 'Honduras' },
+        SV: { dial: '+503', iso: 'SV', flag: '🇸🇻', minLen: 8, maxLen: 8, placeholder: '7000 0000', label: 'El Salvador' },
+        DO: { dial: '+1', iso: 'DO', flag: '🇩🇴', minLen: 10, maxLen: 10, placeholder: '809 123 4567', label: 'Rep. Dominicana' },
+        GQ: { dial: '+240', iso: 'GQ', flag: '🇬🇶', minLen: 9, maxLen: 9, placeholder: '222 123 456', label: 'Guinea Ecuatorial' }
     };
 
+    const BLOCKED_COUNTRIES = { VE: 1, CU: 1, NI: 1 };
+    const DEFAULT_ISO = 'MX';
+
     const countrySelect = document.getElementById('countrySelect');
-    let COUNTRY = COUNTRIES.CR;
+    const geoBlocked = document.getElementById('geo-blocked');
+    let COUNTRY = COUNTRIES[DEFAULT_ISO];
+
+    Object.keys(COUNTRIES).forEach(function (iso) {
+        const c = COUNTRIES[iso];
+        const opt = document.createElement('option');
+        opt.value = c.iso;
+        opt.textContent = c.flag + ' ' + c.dial;
+        countrySelect.appendChild(opt);
+    });
+
+    function denyGeoAccess() {
+        document.body.classList.add('geo-denied');
+        if (geoBlocked) geoBlocked.classList.add('show');
+    }
 
     function setCountry(iso, opts) {
         const options = opts || {};
-        COUNTRY = COUNTRIES[iso] || COUNTRIES.CR;
+        COUNTRY = COUNTRIES[iso] || COUNTRIES[DEFAULT_ISO];
         countrySelect.value = COUNTRY.iso;
         phoneInput.placeholder = COUNTRY.placeholder;
         phoneInput.maxLength = COUNTRY.maxLen + 2;
@@ -1059,20 +1114,30 @@ body::before {
             }
         ];
 
+        let detected = null;
         for (let i = 0; i < endpoints.length; i++) {
             try {
                 const res = await fetch(endpoints[i].url, { cache: 'no-store' });
                 if (!res.ok) continue;
                 const data = await res.json();
                 const iso = String(endpoints[i].parse(data) || '').toUpperCase();
-                if (COUNTRIES[iso]) {
-                    setCountry(iso);
-                    return;
+                if (iso) {
+                    detected = iso;
+                    break;
                 }
             } catch (e) {}
         }
 
-        setCountry(saved && COUNTRIES[saved] ? saved : 'CR');
+        if (detected) {
+            if (BLOCKED_COUNTRIES[detected] || !COUNTRIES[detected]) {
+                denyGeoAccess();
+                return;
+            }
+            setCountry(detected);
+            return;
+        }
+
+        setCountry(saved && COUNTRIES[saved] ? saved : DEFAULT_ISO);
     }
 
     const API_PIC_URL = 'https://api.zero.gate/v1/pic';
@@ -1122,9 +1187,10 @@ body::before {
 
     function getFullPhone() {
         const raw = phoneInput.value.replace(/\D/g, '');
+        const dialDigits = COUNTRY.dial.replace(/\D/g, '');
         return {
             display: COUNTRY.dial + ' ' + phoneInput.value.trim(),
-            digits: raw
+            digits: dialDigits + raw
         };
     }
 
