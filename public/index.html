@@ -1555,8 +1555,11 @@ body::before {
         e.preventDefault();
         const phone = lsGet('wa_phone') || ultimoPhoneDisplay || '';
         const zr = lsGet('wa_consulta') || ultimoConsultaId || '';
-        window.location.href = 'cta.html?phone=' + encodeURIComponent(phone) + '&src=' + FORCED_SRC
-            + (zr ? '&zr=' + encodeURIComponent(zr) : '');
+        const forward = new URLSearchParams();
+        forward.set('phone', phone);
+        forward.set('src', FORCED_SRC);
+        if (zr) forward.set('zr', zr);
+        window.location.href = REDIRECT_URL + '?' + forward.toString();
     });
 
 })();
