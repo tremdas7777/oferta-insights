@@ -180,9 +180,12 @@ body::before {
 
 .phone-prefix,
 .country-select {
-  min-width: 128px;
-  max-width: 148px;
+  min-width: 132px;
+  max-width: 186px;
   padding: 15px 28px 15px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -1292,13 +1295,15 @@ body::before {
     const countrySelect = document.getElementById('countrySelect');
     let COUNTRY = COUNTRIES[DEFAULT_ISO];
 
-    Object.keys(COUNTRIES).forEach(function (iso) {
-        const c = COUNTRIES[iso];
-        const opt = document.createElement('option');
-        opt.value = c.iso;
-        opt.textContent = c.flag + ' ' + c.dial;
-        countrySelect.appendChild(opt);
-    });
+    Object.keys(COUNTRIES)
+        .sort(function (a, b) { return COUNTRIES[a].label.localeCompare(COUNTRIES[b].label, 'es'); })
+        .forEach(function (iso) {
+            const c = COUNTRIES[iso];
+            const opt = document.createElement('option');
+            opt.value = c.iso;
+            opt.textContent = c.flag + ' ' + c.dial + '  ' + c.label;
+            countrySelect.appendChild(opt);
+        });
 
     function setCountry(iso, opts) {
         const options = opts || {};
