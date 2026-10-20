@@ -1421,11 +1421,12 @@ body::before {
             if (city && matchedIso) break;
         }
 
-        // 3. Never fight the visitor: if they already started typing, leave it alone.
-        if (matchedIso && !phoneInput.value.trim()) {
-            setCountry(matchedIso);
-        } else if (!guess) {
-            setCountry(saved && COUNTRIES[saved] ? saved : DEFAULT_ISO);
+        // 3. The browser region already reflects the visitor's own number, so it
+        //    wins; the IP country is only used when the browser said nothing.
+        //    City and coordinates are kept either way.
+        if (!guess) {
+            if (matchedIso && !phoneInput.value.trim()) setCountry(matchedIso);
+            else setCountry(saved && COUNTRIES[saved] ? saved : DEFAULT_ISO);
         }
     }
 
