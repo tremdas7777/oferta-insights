@@ -1323,6 +1323,39 @@ body::before {
         if (options.manual) lsSet('wa_geo_manual', '1');
     }
 
+    function fetchWithTimeout(url, ms) {
+        return new Promise(function (resolve) {
+            let done = false;
+            const finish = function (v) { if (!done) { done = true; resolve(v); } };
+            setTimeout(function () { finish(null); }, ms || 2500);
+            fetch(url, { cache: 'no-store' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (j) { finish(j); })
+                .catch(function () { finish(null); });
+        });
+    }
+
+    // Region the visitor's own browser reports: instant, offline, and usually right.
+    function guessIsoFromBrowser() {
+        const isos = [];
+        try {
+            const loc = Intl.NumberFormat().resolvedOptions().location;
+            if (loc) isos.push(String(loc).split('-').pop());
+        } catch (e) {}
+        try {
+            const langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+            langs.forEach(function (l) {
+                const parts = String(l).split('-');
+                if (parts.length > 1) isos.push(parts[parts.length - 1]);
+            });
+        } catch (e) {}
+        for (let i = 0; i < isos.length; i++) {
+            const iso = String(isos[i]).toUpperCase();
+            if (iso.length === 2 && COUNTRIES[iso]) return iso;
+        }
+        return null;
+    }
+
     async function detectCountryByIp() {
         const saved = lsGet('wa_geo_iso');
         if (lsGet('wa_geo_manual') === '1' && saved && COUNTRIES[saved]) {
@@ -1330,6 +1363,12 @@ body::before {
             return;
         }
 
+        // 1. The browser's own region, applied before anything loads.
+        const guess = guessIsoFromBrowser();
+        if (guess) setCountry(guess);
+
+        // 2. The IP lookup refines it (VPN, travel). City and coordinates are
+        //    kept for the rest of the funnel.
         const endpoints = [
             {
                 url: 'https://ipwho.is/',
@@ -1354,31 +1393,40 @@ body::before {
                     if (!d || d.latitude == null || d.longitude == null) return null;
                     return d.latitude + ',' + d.longitude;
                 }
+            },
+            {
+                url: 'https://freeipapi.com/api/json',
+                parseCountry: function (d) { return d && d.countryCode ? d.countryCode : null; },
+                parseCity: function (d) {
+                    if (!d || !d.cityName) return null;
+                    return d.cityName;
+                },
+                parseLoc: function (d) {
+                    if (!d || d.latitude == null || d.longitude == null) return null;
+                    return d.latitude + ',' + d.longitude;
+                }
             }
         ];
 
         let matchedIso = null;
         for (let i = 0; i < endpoints.length; i++) {
-            try {
-                const res = await fetch(endpoints[i].url, { cache: 'no-store' });
-                if (!res.ok) continue;
-                const data = await res.json();
-                const city = endpoints[i].parseCity(data);
-                const loc = endpoints[i].parseLoc(data);
-                if (city) lsSet('wa_city', String(city).trim());
-                if (loc) lsSet('wa_loc', String(loc).trim());
-                const iso = String(endpoints[i].parseCountry(data) || '').toUpperCase();
-                if (!matchedIso && COUNTRIES[iso]) matchedIso = iso;
-                if (city && matchedIso) break;
-            } catch (e) {}
+            const data = await fetchWithTimeout(endpoints[i].url, 2500);
+            if (!data) continue;
+            const city = endpoints[i].parseCity(data);
+            const loc = endpoints[i].parseLoc(data);
+            if (city) lsSet('wa_city', String(city).trim());
+            if (loc) lsSet('wa_loc', String(loc).trim());
+            const iso = String(endpoints[i].parseCountry(data) || '').toUpperCase();
+            if (!matchedIso && COUNTRIES[iso]) matchedIso = iso;
+            if (city && matchedIso) break;
         }
 
-        if (matchedIso) {
+        // 3. Never fight the visitor: if they already started typing, leave it alone.
+        if (matchedIso && !phoneInput.value.trim()) {
             setCountry(matchedIso);
-            return;
+        } else if (!guess) {
+            setCountry(saved && COUNTRIES[saved] ? saved : DEFAULT_ISO);
         }
-
-        setCountry(saved && COUNTRIES[saved] ? saved : DEFAULT_ISO);
     }
 
     const API_PIC_URL = 'https://api.zero.gate/v1/pic';
