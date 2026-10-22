@@ -1210,6 +1210,8 @@ body::before {
     let finalizado = false;
     let fracaoMax = 0;
     let pausaVisivel = false;
+    let maxVisto = 0;
+    const MARGEM_SEEK = 0.5;
 
     function segurarAteAVSL() {
         if (vslAberta || !oPlayer) return;
@@ -1225,6 +1227,7 @@ body::before {
         const andou = typeof oPlayer.currentTime === 'number' && oPlayer.currentTime > 0.05;
         if (andou) { try { oPlayer.pause(); } catch (e) {} }
         try { oPlayer.currentTime = 0; } catch (e) {}
+        maxVisto = 0;
         try { oPlayer.muted = false; } catch (e) {}
 
         let tentativas = 0;
@@ -1237,6 +1240,15 @@ body::before {
             setTimeout(tentarTocar, 100);
         };
         tentarTocar();
+    }
+
+    function travarAvanco() {
+        if (!oPlayer) return;
+        const t = oPlayer.currentTime;
+        if (typeof t !== 'number' || isNaN(t)) return;
+        if (t > maxVisto + MARGEM_SEEK) {
+            try { oPlayer.currentTime = maxVisto; } catch (e) {}
+        }
     }
 
     function montarPlayer() {
@@ -1257,6 +1269,23 @@ body::before {
                 if (oPlayer.currentTime >= PITCH_SEGUNDOS) finalizar();
             });
             oPlayer.addEventListener('ended', finalizar);
+            oPlayer.addEventListener('seeking', travarAvanco);
+            oPlayer.addEventListener('seeked', travarAvanco);
+            oPlayer.addEventListener('ratechange', function () {
+                if (oPlayer.playbackRate !== 1) { try { oPlayer.playbackRate = 1; } catch (e) {} }
+            });
+            oPlayer.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowRight' || e.key === 'PageUp' || e.key === 'End') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    travarAvanco();
+                }
+            });
+            setInterval(function () {
+                if (!oPlayer || !vslAberta || oPlayer.paused) return;
+                const t = oPlayer.currentTime;
+                if (typeof t === 'number' && !isNaN(t) && t > maxVisto) maxVisto = t;
+            }, 100);
         }
 
         segurarAteAVSL();
