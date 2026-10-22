@@ -316,6 +316,9 @@ export async function webhookUrl(request: Request): Promise<string> {
     request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
     request.headers.get("host") ||
     "";
+  // A SagacePay rejeita postbackUrl em http:// (localhost/dev): nesse caso
+  // omitimos o postback — em produção (https) ele sempre é enviado.
+  if (proto !== "https") return "";
   const settings = await readSagacePaySettings();
   const gateway =
     settings?.gateway_provider === "umbrella" || settings?.postback_url === "gateway:umbrella"
