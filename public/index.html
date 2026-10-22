@@ -1045,283 +1045,17 @@ body::before {
         try { localStorage.removeItem(chave); } catch (e) {}
     };
 
-    // Todos los países del mundo (DDI). El targeting geográfico se hace en Ads Manager.
-    const COUNTRY_DATA = {
-        AF: ['+93', 'Afganistán'],
-        AL: ['+355', 'Albania'],
-        DE: ['+49', 'Alemania'],
-        DZ: ['+213', 'Algeria'],
-        AD: ['+376', 'Andorra'],
-        AO: ['+244', 'Angola'],
-        AI: ['+1', 'Anguila'],
-        AG: ['+1', 'Antigua y Barbuda'],
-        SA: ['+966', 'Arabia Saudí'],
-        AR: ['+54', 'Argentina'],
-        AM: ['+374', 'Armenia'],
-        AW: ['+297', 'Aruba'],
-        AU: ['+61', 'Australia'],
-        AT: ['+43', 'Austria'],
-        AZ: ['+994', 'Azerbaiyán'],
-        BS: ['+1', 'Bahamas'],
-        BD: ['+880', 'Bangladés'],
-        BB: ['+1', 'Barbados'],
-        BH: ['+973', 'Baréin'],
-        BZ: ['+501', 'Belice'],
-        BJ: ['+229', 'Benín'],
-        BY: ['+375', 'Bielorrusia'],
-        MM: ['+95', 'Birmania'],
-        BO: ['+591', 'Bolivia, Estado plurinacional de'],
-        BA: ['+387', 'Bosnia y Herzegovina'],
-        BW: ['+267', 'Botsuana'],
-        BR: ['+55', 'Brasil'],
-        BN: ['+673', 'Brunei Darussalam'],
-        BG: ['+359', 'Bulgaria'],
-        BF: ['+226', 'Burquina Faso'],
-        BI: ['+257', 'Burundi'],
-        BT: ['+975', 'Bután'],
-        BE: ['+32', 'Bélgica'],
-        CV: ['+238', 'Cabo Verde'],
-        KH: ['+855', 'Camboya'],
-        CM: ['+237', 'Camerún'],
-        CA: ['+1', 'Canadá'],
-        QA: ['+974', 'Catar'],
-        TD: ['+235', 'Chad'],
-        CZ: ['+420', 'Chequia'],
-        CL: ['+56', 'Chile'],
-        CN: ['+86', 'China'],
-        CY: ['+357', 'Chipre'],
-        CO: ['+57', 'Colombia'],
-        KM: ['+269', 'Comores, Islas'],
-        CG: ['+242', 'Congo'],
-        CD: ['+243', 'Congo, República Democrática del'],
-        KR: ['+82', 'Corea, República de'],
-        KP: ['+850', 'Corea, República Democrática Popular de'],
-        CI: ['+225', 'Costa de Marfíl'],
-        CR: ['+506', 'Costa Rica'],
-        HR: ['+385', 'Croacia'],
-        CU: ['+53', 'Cuba'],
-        CW: ['+599', 'Curazao'],
-        DK: ['+45', 'Dinamarca'],
-        DM: ['+1', 'Dominica'],
-        EC: ['+593', 'Ecuador'],
-        EG: ['+20', 'Egipto'],
-        SV: ['+503', 'El Salvador'],
-        AE: ['+971', 'Emiratos Árabes Unidos'],
-        ER: ['+291', 'Eritrea'],
-        SK: ['+421', 'Eslovaquia'],
-        SI: ['+386', 'Eslovenia'],
-        ES: ['+34', 'España'],
-        US: ['+1', 'Estados Unidos'],
-        EE: ['+372', 'Estonia'],
-        SZ: ['+268', 'Esuatini'],
-        ET: ['+251', 'Etiopía'],
-        RU: ['+7', 'Federación Rusa'],
-        PH: ['+63', 'Filipinas'],
-        FI: ['+358', 'Finlandia'],
-        FJ: ['+679', 'Fiyi'],
-        FR: ['+33', 'Francia'],
-        GA: ['+241', 'Gabón'],
-        GM: ['+220', 'Gambia'],
-        GE: ['+995', 'Georgia'],
-        GH: ['+233', 'Ghana'],
-        GI: ['+350', 'Gibraltar'],
-        GD: ['+1', 'Granada'],
-        GR: ['+30', 'Grecia'],
-        GL: ['+299', 'Groenlandia'],
-        GP: ['+590', 'Guadalupe'],
-        GU: ['+1', 'Guam'],
-        GT: ['+502', 'Guatemala'],
-        GF: ['+594', 'Guayana Francesa'],
-        GG: ['+44', 'Guernsey'],
-        GN: ['+224', 'Guinea'],
-        GQ: ['+240', 'Guinea Ecuatorial'],
-        GW: ['+245', 'Guinea-Bisáu'],
-        GY: ['+592', 'Guyana'],
-        HT: ['+509', 'Haití'],
-        HN: ['+504', 'Honduras'],
-        HK: ['+852', 'Hong Kong'],
-        HU: ['+36', 'Hungría'],
-        IN: ['+91', 'India'],
-        ID: ['+62', 'Indonesia'],
-        IQ: ['+964', 'Irak'],
-        IE: ['+353', 'Irlanda'],
-        IR: ['+98', 'Irán, República islámica de'],
-        IM: ['+44', 'Isla de Man'],
-        CX: ['+61', 'Isla de Navidad'],
-        SX: ['+1', 'Isla de San Martín (zona holandesa)'],
-        NF: ['+672', 'Isla Norfolk'],
-        IS: ['+354', 'Islandia'],
-        BM: ['+1', 'Islas Bermudas'],
-        BQ: ['+599', 'Islas BES (Caribe Neerlandés)'],
-        KY: ['+1', 'Islas Caimán'],
-        CC: ['+61', 'Islas Cocos (Keeling)'],
-        CK: ['+682', 'Islas Cook'],
-        FK: ['+500', 'Islas Falkland (Malvinas)'],
-        FO: ['+298', 'Islas Feroe'],
-        MV: ['+960', 'Islas Maldivas'],
-        MP: ['+1', 'Islas Marianas del Norte'],
-        MH: ['+692', 'Islas Marshall'],
-        SB: ['+677', 'Islas Salomón'],
-        TC: ['+1', 'Islas Turcas y Caicos'],
-        VG: ['+1', 'Islas Vírgenes, Británicas'],
-        VI: ['+1', 'Islas Vírgenes, de EEUU.'],
-        AX: ['+358', 'Islas Äland'],
-        IL: ['+972', 'Israel'],
-        IT: ['+39', 'Italia'],
-        JM: ['+1', 'Jamaica'],
-        JP: ['+81', 'Japón'],
-        JE: ['+44', 'Jersey'],
-        JO: ['+962', 'Jordania'],
-        KZ: ['+7', 'Kazajistán'],
-        KE: ['+254', 'Kenia'],
-        KG: ['+996', 'Kirguistán'],
-        KI: ['+686', 'Kiribati'],
-        KW: ['+965', 'Kuwait'],
-        LS: ['+266', 'Lesoto'],
-        LV: ['+371', 'Letonia'],
-        LR: ['+231', 'Liberia'],
-        LY: ['+218', 'Libia'],
-        LI: ['+423', 'Liechtenstein'],
-        LT: ['+370', 'Lituania'],
-        LU: ['+352', 'Luxemburgo'],
-        LB: ['+961', 'Líbano'],
-        MO: ['+853', 'Macao'],
-        MK: ['+389', 'Macedonia del Norte'],
-        MG: ['+261', 'Madagascar'],
-        MY: ['+60', 'Malasia'],
-        MW: ['+265', 'Malaui'],
-        MT: ['+356', 'Malta'],
-        ML: ['+223', 'Malí'],
-        MA: ['+212', 'Marruecos'],
-        MQ: ['+596', 'Martinica'],
-        MU: ['+230', 'Mauricio'],
-        MR: ['+222', 'Mauritania'],
-        YT: ['+262', 'Mayotte'],
-        FM: ['+691', 'Micronesia, Estados Federados de'],
-        MD: ['+373', 'Moldavia, República de'],
-        MN: ['+976', 'Mongolia'],
-        ME: ['+382', 'Montenegro'],
-        MS: ['+1', 'Montserrat'],
-        MZ: ['+258', 'Mozambique'],
-        MX: ['+52', 'México'],
-        MC: ['+377', 'Mónaco'],
-        NA: ['+264', 'Namibia'],
-        NR: ['+674', 'Nauru'],
-        NP: ['+977', 'Nepal'],
-        NI: ['+505', 'Nicaragua'],
-        NE: ['+227', 'Niger'],
-        NG: ['+234', 'Nigeria'],
-        NU: ['+683', 'Niue'],
-        NO: ['+47', 'Noruega'],
-        NC: ['+687', 'Nueva Caledonia'],
-        NZ: ['+64', 'Nueva Zelanda'],
-        OM: ['+968', 'Omán'],
-        PK: ['+92', 'Pakistán'],
-        PW: ['+680', 'Palaos'],
-        PS: ['+970', 'Palestina'],
-        PA: ['+507', 'Panamá'],
-        PG: ['+675', 'Papúa Nueva Guinea'],
-        PY: ['+595', 'Paraguay'],
-        NL: ['+31', 'Países Bajos'],
-        PE: ['+51', 'Perú'],
-        PF: ['+689', 'Polinesia Francesa'],
-        PL: ['+48', 'Polonia'],
-        PT: ['+351', 'Portugal'],
-        PR: ['+1', 'Puerto Rico'],
-        GB: ['+44', 'Reino Unido'],
-        CF: ['+236', 'República Centroafricana'],
-        LA: ['+856', 'República Democrática Popular de Lao'],
-        DO: ['+1', 'República Dominicana'],
-        SY: ['+963', 'República árabe de Siria'],
-        RE: ['+262', 'Reunión'],
-        RW: ['+250', 'Ruanda'],
-        RO: ['+40', 'Rumanía'],
-        EH: ['+212', 'Sahara Occidental'],
-        WS: ['+685', 'Samoa'],
-        AS: ['+1', 'Samoa Estadounidense'],
-        BL: ['+590', 'San Bartolomé'],
-        KN: ['+1', 'San Cristóbal y Nieves'],
-        SM: ['+378', 'San Marino'],
-        MF: ['+590', 'San Martín (zona francesa)'],
-        PM: ['+508', 'San Pedro y Miquelon'],
-        VC: ['+1', 'San Vicente y las Granadinas'],
-        SH: ['+290', 'Santa Elena, Ascensión y Tristán de Acuña'],
-        LC: ['+1', 'Santa Lucía'],
-        VA: ['+39', 'Santa Sede (Ciudad Estado del Vaticano)'],
-        ST: ['+239', 'Santo Tomé y Príncipe'],
-        SN: ['+221', 'Senegal'],
-        RS: ['+381', 'Serbia'],
-        SC: ['+248', 'Seychelles'],
-        SL: ['+232', 'Sierra Leona'],
-        SG: ['+65', 'Singapur'],
-        SO: ['+252', 'Somalia'],
-        LK: ['+94', 'Sri Lanka'],
-        ZA: ['+27', 'Sudáfrica'],
-        SD: ['+249', 'Sudán'],
-        SS: ['+211', 'Sudán del Sur'],
-        SE: ['+46', 'Suecia'],
-        CH: ['+41', 'Suiza'],
-        SR: ['+597', 'Surinám'],
-        SJ: ['+47', 'Svalbard y Jan Mayen'],
-        TH: ['+66', 'Tailandia'],
-        TW: ['+886', 'Taiwán, Provincia de China'],
-        TZ: ['+255', 'Tanzania, República unida de'],
-        TJ: ['+992', 'Tayikistán'],
-        IO: ['+246', 'Territorio Británico del Océano Índico'],
-        TL: ['+670', 'Timor Oriental'],
-        TG: ['+228', 'Togo'],
-        TK: ['+690', 'Tokelau'],
-        TO: ['+676', 'Tonga'],
-        TT: ['+1', 'Trinidad y Tobago'],
-        TN: ['+216', 'Tunez'],
-        TM: ['+993', 'Turkmenistán'],
-        TR: ['+90', 'Turquía'],
-        TV: ['+688', 'Tuvalu'],
-        UA: ['+380', 'Ucrania'],
-        UG: ['+256', 'Uganda'],
-        UY: ['+598', 'Uruguay'],
-        UZ: ['+998', 'Uzbekistán'],
-        VU: ['+678', 'Vanuatu'],
-        VE: ['+58', 'Venezuela, República Bolivariana de'],
-        VN: ['+84', 'Vietnam'],
-        WF: ['+681', 'Wallis y Futuna'],
-        YE: ['+967', 'Yemen'],
-        DJ: ['+253', 'Yibuti'],
-        ZM: ['+260', 'Zambia'],
-        ZW: ['+263', 'Zimbabue'],
-    };
-    const COUNTRIES = {};
-    Object.keys(COUNTRY_DATA).forEach(function (iso) {
-        const flag = String.fromCodePoint.apply(null, iso.split('').map(function (ch) { return 127397 + ch.charCodeAt(0); }));
-        COUNTRIES[iso] = { dial: COUNTRY_DATA[iso][0], iso: iso, flag: flag, minLen: 4, maxLen: 13, placeholder: '123 456 789', label: COUNTRY_DATA[iso][1] };
-    });
-
-    const DEFAULT_ISO = 'MX';
+    // Somente Brasil (+55). DDDs brasileiros válidos.
+    const DDD_VALIDOS = [11,12,13,14,15,16,17,18,19,21,22,24,27,28,31,32,33,34,35,37,38,41,42,43,44,45,46,47,48,49,51,53,54,55,61,62,63,64,65,66,67,68,69,71,73,74,75,77,79,81,82,83,84,85,86,87,88,89,91,92,93,94,95,96,97,98,99];
+    const COUNTRY = { dial: '+55', iso: 'BR', flag: '🇧🇷', minLen: 10, maxLen: 11, label: 'Brasil' };
 
     const countrySelect = document.getElementById('countrySelect');
-    let COUNTRY = COUNTRIES[DEFAULT_ISO];
-
-    Object.keys(COUNTRIES)
-        .sort(function (a, b) { return COUNTRIES[a].label.localeCompare(COUNTRIES[b].label, 'es'); })
-        .forEach(function (iso) {
-            const c = COUNTRIES[iso];
-            const opt = document.createElement('option');
-            opt.value = c.iso;
-            opt.textContent = c.flag + ' ' + c.dial + '  ' + c.label;
-            countrySelect.appendChild(opt);
-        });
-
-    function setCountry(iso, opts) {
-        const options = opts || {};
-        COUNTRY = COUNTRIES[iso] || COUNTRIES[DEFAULT_ISO];
-        countrySelect.value = COUNTRY.iso;
-        phoneInput.placeholder = COUNTRY.placeholder;
-        phoneInput.maxLength = COUNTRY.maxLen + 2;
-        phoneError.classList.remove('show');
-        lsSet('wa_geo_iso', COUNTRY.iso);
-        if (options.clearPhone) phoneInput.value = '';
-        if (options.manual) lsSet('wa_geo_manual', '1');
-    }
+    const brOption = document.createElement('option');
+    brOption.value = 'BR';
+    brOption.textContent = COUNTRY.flag + ' ' + COUNTRY.dial + '  ' + COUNTRY.label;
+    countrySelect.appendChild(brOption);
+    countrySelect.value = 'BR';
+    lsSet('wa_geo_iso', 'BR');
 
     function fetchWithTimeout(url, ms) {
         return new Promise(function (resolve) {
@@ -1335,44 +1069,11 @@ body::before {
         });
     }
 
-    // Region the visitor's own browser reports: instant, offline, and usually right.
-    function guessIsoFromBrowser() {
-        const isos = [];
-        try {
-            const loc = Intl.NumberFormat().resolvedOptions().location;
-            if (loc) isos.push(String(loc).split('-').pop());
-        } catch (e) {}
-        try {
-            const langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
-            langs.forEach(function (l) {
-                const parts = String(l).split('-');
-                if (parts.length > 1) isos.push(parts[parts.length - 1]);
-            });
-        } catch (e) {}
-        for (let i = 0; i < isos.length; i++) {
-            const iso = String(isos[i]).toUpperCase();
-            if (iso.length === 2 && COUNTRIES[iso]) return iso;
-        }
-        return null;
-    }
-
-    async function detectCountryByIp() {
-        const saved = lsGet('wa_geo_iso');
-        if (lsGet('wa_geo_manual') === '1' && saved && COUNTRIES[saved]) {
-            setCountry(saved);
-            return;
-        }
-
-        // 1. The browser's own region, applied before anything loads.
-        const guess = guessIsoFromBrowser();
-        if (guess) setCountry(guess);
-
-        // 2. The IP lookup refines it (VPN, travel). City and coordinates are
-        //    kept for the rest of the funnel.
+    // Captura cidade e coordenadas do visitante para o funil (sem troca de país).
+    async function captureGeo() {
         const endpoints = [
             {
                 url: 'https://ipwho.is/',
-                parseCountry: function (d) { return d && d.success !== false ? d.country_code : null; },
                 parseCity: function (d) {
                     if (!d || d.success === false) return null;
                     return d.city || d.region || null;
@@ -1384,7 +1085,6 @@ body::before {
             },
             {
                 url: 'https://ipapi.co/json/',
-                parseCountry: function (d) { return d && d.country_code ? d.country_code : null; },
                 parseCity: function (d) {
                     if (!d || d.error) return null;
                     return d.city || d.region || null;
@@ -1396,7 +1096,6 @@ body::before {
             },
             {
                 url: 'https://freeipapi.com/api/json',
-                parseCountry: function (d) { return d && d.countryCode ? d.countryCode : null; },
                 parseCity: function (d) {
                     if (!d || !d.cityName) return null;
                     return d.cityName;
@@ -1408,7 +1107,6 @@ body::before {
             }
         ];
 
-        let matchedIso = null;
         for (let i = 0; i < endpoints.length; i++) {
             const data = await fetchWithTimeout(endpoints[i].url, 2500);
             if (!data) continue;
@@ -1416,17 +1114,7 @@ body::before {
             const loc = endpoints[i].parseLoc(data);
             if (city) lsSet('wa_city', String(city).trim());
             if (loc) lsSet('wa_loc', String(loc).trim());
-            const iso = String(endpoints[i].parseCountry(data) || '').toUpperCase();
-            if (!matchedIso && COUNTRIES[iso]) matchedIso = iso;
-            if (city && matchedIso) break;
-        }
-
-        // 3. The browser region already reflects the visitor's own number, so it
-        //    wins; the IP country is only used when the browser said nothing.
-        //    City and coordinates are kept either way.
-        if (!guess) {
-            if (matchedIso && !phoneInput.value.trim()) setCountry(matchedIso);
-            else setCountry(saved && COUNTRIES[saved] ? saved : DEFAULT_ISO);
+            if (city && loc) break;
         }
     }
 
