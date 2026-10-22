@@ -1604,7 +1604,7 @@
                 <label class="pix-field"><span>E-mail <small>(opcional)</small></span><input id="pix-email" name="email" type="email" autocomplete="email" maxlength="240"></label>
                 <label class="pix-field"><span>Telefone <small>(opcional)</small></span><input id="pix-phone" name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
                 <div id="pix-form-error" class="pix-error" hidden role="alert"></div>
-                <button class="checkout-btn pix-submit" type="submit">GERAR PIX DE R$ 137,00</button>
+                <button class="checkout-btn pix-submit" type="submit">PAGAR AGORA</button>
             </form>
         </div>
         <div id="pix-result-view" class="pix-payment" hidden>
@@ -1971,7 +1971,7 @@
         resultView.hidden = true;
         formView.hidden = false;
         submitButton.disabled = false;
-        submitButton.textContent = 'GERAR PIX DE R$ 137,00';
+        submitButton.textContent = 'PAGAR AGORA';
     }
 
     function getCookie(name) {
@@ -2006,7 +2006,7 @@
             formView.hidden = false;
             resultView.hidden = true;
             submitButton.disabled = false;
-            submitButton.textContent = 'GERAR PIX DE R$ 137,00';
+            submitButton.textContent = 'PAGAR AGORA';
             setError('A cobrança foi criada, mas a resposta não trouxe o código PIX. Tente novamente ou fale com o suporte.');
             return;
         }
@@ -2103,7 +2103,7 @@
             .catch(function (error) {
                 setError(error.message || 'Não foi possível gerar o PIX. Tente novamente.');
                 submitButton.disabled = false;
-                submitButton.textContent = 'GERAR PIX DE R$ 137,00';
+                submitButton.textContent = 'PAGAR AGORA';
             });
     });
 
