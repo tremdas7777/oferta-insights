@@ -1061,7 +1061,16 @@ body::before {
     phoneInput.addEventListener('input', function() {
         let v = this.value.replace(/\D/g, '');
         if (v.length > BRAZIL.maxLen) v = v.slice(0, BRAZIL.maxLen);
-        this.value = v;
+        if (v.length > 2) {
+            let rest = v.slice(2);
+            if (rest.length > 5) rest = rest.slice(0, 5) + '-' + rest.slice(5);
+            else if (rest.length > 4 && v.length <= 10) rest = rest.slice(0, 4) + '-' + rest.slice(4);
+            this.value = '(' + v.slice(0, 2) + ') ' + rest;
+        } else if (v.length > 0) {
+            this.value = '(' + v;
+        } else {
+            this.value = '';
+        }
     });
 
     phoneInput.addEventListener('keypress', function(e) {
