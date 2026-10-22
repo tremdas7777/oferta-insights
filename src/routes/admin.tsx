@@ -630,9 +630,31 @@ function LiveView({
   const windowLabel = windowMinutes === 0 ? "todo o histórico" : `últimos ${formatWindow(windowMinutes)}`;
   const stages = Object.keys(labels).map((eventName) => ({
     eventName,
-    label: labels[eventName],
-    count: active.filter((event) => event.event_name === eventName).length,
+    label: labels[eventName] ?? eventName,
+    sessions: new Set(
+      active.filter((event) => event.event_name === eventName).map((event) => event.session_id),
+    ).size,
   }));
+  const stageRate = (eventName: string) => {
+    const stage = stages.find((item) => item.eventName === eventName);
+    return sessions && stage ? (stage.sessions / sessions) * 100 : 0;
+  };
+  const traffic = new Map<string, { sessions: Set<string>; events: number; pix: Set<string> }>();
+  active.forEach((event) => {
+    const metadata = event.metadata ?? {};
+    const sourceValue =
+      metadata["utmSource"] ?? metadata["utm_source"] ?? metadata["source"] ??
+      (metadata["fbclid"] ? "Meta Ads" : metadata["gclid"] ? "Google Ads" : "Direto");
+    const source = typeof sourceValue === "string" && sourceValue.trim() ? sourceValue.trim() : "Direto";
+    const row = traffic.get(source) ?? { sessions: new Set<string>(), events: 0, pix: new Set<string>() };
+    row.sessions.add(event.session_id);
+    row.events += 1;
+    if (event.event_name === "pix_generated") row.pix.add(event.session_id);
+    traffic.set(source, row);
+  });
+  const trafficRows = Array.from(traffic.entries())
+    .map(([source, row]) => ({ source, sessions: row.sessions.size, events: row.events, pix: row.pix.size }))
+    .sort((a, b) => b.sessions - a.sessions || b.events - a.events);
   return (
     <section className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900 p-5">
@@ -680,9 +702,53 @@ function LiveView({
           accent
         />
         {stages.map((stage) => (
-          <Metric key={stage.eventName} label={stage.label ?? stage.eventName} value={String(stage.count)} />
+          <Metric
+            key={stage.eventName}
+            label={stage.label}
+            value={String(stage.sessions)}
+            hint={`${((stage.sessions / (sessions || 1)) * 100).toFixed(1)}% das sessões`}
+          />
         ))}
       </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric label="Eventos registrados" value={String(active.length)} hint={windowLabel} />
+        <Metric label="Taxa telefone" value={`${stageRate("phone_submitted").toFixed(1)}%`} hint="Das sessões do período" />
+        <Metric label="Taxa checkout" value={`${stageRate("checkout_opened").toFixed(1)}%`} hint="Das sessões do período" />
+        <Metric label="Taxa geração PIX" value={`${stageRate("pix_generated").toFixed(1)}%`} hint="Das sessões do período" accent />
+      </div>
+      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+        <div className="border-b border-slate-800 p-5">
+          <h2 className="font-semibold">Origem do tráfego</h2>
+          <p className="mt-1 text-sm text-slate-500">Sessões e geração de PIX agrupadas por UTM ou plataforma detectada</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-950/60 text-xs uppercase tracking-wide text-slate-500">
+              <tr>
+                <th className="px-5 py-3">Origem</th>
+                <th className="px-5 py-3">Sessões</th>
+                <th className="px-5 py-3">Eventos</th>
+                <th className="px-5 py-3">PIX gerados</th>
+                <th className="px-5 py-3">Taxa PIX</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800">
+              {trafficRows.map((row) => (
+                <tr key={row.source} className="hover:bg-slate-800/40">
+                  <td className="px-5 py-3 font-medium text-slate-200">{row.source}</td>
+                  <td className="px-5 py-3 text-slate-300">{row.sessions}</td>
+                  <td className="px-5 py-3 text-slate-400">{row.events}</td>
+                  <td className="px-5 py-3 text-emerald-300">{row.pix}</td>
+                  <td className="px-5 py-3 text-slate-400">{((row.pix / (row.sessions || 1)) * 100).toFixed(1)}%</td>
+                </tr>
+              ))}
+              {!trafficRows.length && (
+                <tr><td colSpan={5} className="px-5 py-8 text-center text-slate-500">Nenhuma origem registrada no período.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
       <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
         <div className="border-b border-slate-800 p-5">
           <h2 className="font-semibold">Atividade recente</h2>
