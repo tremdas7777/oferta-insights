@@ -133,7 +133,7 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
           const clientIpAddress = getForwardedIp(request);
           if (userAgent) tracking["clientUserAgent"] = userAgent;
           if (clientIpAddress) tracking["clientIpAddress"] = clientIpAddress;
-          const postbackUrl = webhookUrl(request);
+          const postbackUrl = await webhookUrl(request);
 
           const saleInput: CreateSaleInput = {
             customer: {

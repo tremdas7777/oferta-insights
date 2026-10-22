@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export type SagacePaySettings = {
+  gateway_provider?: "sagacepay" | "umbrella" | null | undefined;
   api_key?: string | null | undefined;
   webhook_secret?: string | null | undefined;
   utmfy_api_token?: string | null | undefined;

@@ -15,11 +15,13 @@ export const Route = createFileRoute("/api/admin/settings")({
         if (!(await isAdminRequest(request))) return unauthorized();
         const settings = await readSagacePaySettings();
         const apiKey = settings?.api_key?.trim() ?? "";
+        const gateway = settings?.gateway_provider === "sagacepay" ? "sagacepay" : "umbrella";
         const umbrella = await getUmbrellaKeySource();
         const utmfyApiToken =
           settings?.utmfy_api_token?.trim() || process.env["UTMFY_API_TOKEN"]?.trim() || "";
         return Response.json({
           configured: Boolean(apiKey || process.env["SAGACEPAY_API_KEY"]),
+          activeGateway: gateway,
           apiKeyLast4: apiKey
             ? apiKey.slice(-4)
             : (process.env["SAGACEPAY_API_KEY"]?.slice(-4) ?? ""),
@@ -31,7 +33,7 @@ export const Route = createFileRoute("/api/admin/settings")({
           umbrellaConfigured: Boolean(umbrella.key),
           umbrellaKeyLast4: umbrella.key?.slice(-4) ?? "",
           umbrellaKeySource: umbrella.source,
-          postbackUrl: webhookUrl(request),
+          postbackUrl: await webhookUrl(request),
           amount: Number(settings?.amount ?? 137),
           notificationWebhookUrl: settings?.notification_webhook_url ?? "",
           productName: settings?.product_name ?? "Ebook Amoroso",
@@ -86,6 +88,7 @@ export const Route = createFileRoute("/api/admin/settings")({
           typeof body["umbrellaApiKey"] === "string" && body["umbrellaApiKey"].trim()
             ? body["umbrellaApiKey"].trim()
             : null;
+        const gateway = body["gateway"] === "sagacepay" ? "sagacepay" : "umbrella";
         const amount = Number(body["amount"] ?? current.amount ?? 137);
         const notificationWebhookUrl =
           typeof body["notificationWebhookUrl"] === "string"
@@ -95,18 +98,17 @@ export const Route = createFileRoute("/api/admin/settings")({
           typeof body["productName"] === "string" && body["productName"].trim()
             ? body["productName"].trim().slice(0, 120)
             : current.product_name?.trim() || "Ebook Amoroso";
-        if (
-          (!apiKey || !webhookSecret) &&
-          !umbrellaApiKey &&
-          !currentUmbrella.key &&
-          !process.env["UMBRELLA_API_KEY"]?.trim()
-        ) {
+        const hasUmbrella = Boolean(
+          umbrellaApiKey || currentUmbrella.key || process.env["UMBRELLA_API_KEY"]?.trim(),
+        );
+        if (gateway === "sagacepay" && (!apiKey || !webhookSecret)) {
           return Response.json(
-            {
-              error: "Configure a chave Umbrella ou informe API key e webhook secret da SagacePay.",
-            },
+            { error: "Para usar SagacePay, informe API key e webhook secret." },
             { status: 400 },
           );
+        }
+        if (gateway === "umbrella" && !hasUmbrella) {
+          return Response.json({ error: "Configure a chave da UmbrellaPag." }, { status: 400 });
         }
         if (!Number.isFinite(amount) || amount <= 0) {
           return Response.json({ error: "Informe um valor válido." }, { status: 400 });
@@ -124,6 +126,7 @@ export const Route = createFileRoute("/api/admin/settings")({
         }
         try {
           await saveSagacePaySettings({
+            gateway_provider: gateway,
             api_key: apiKey,
             webhook_secret: webhookSecret,
             utmfy_api_token: utmfyApiToken || null,

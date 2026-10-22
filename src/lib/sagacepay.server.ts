@@ -9,6 +9,7 @@ export const IMMEDIATE_ACCESS_AMOUNT = 29.9;
 export const IMMEDIATE_ACCESS_PRODUCT_NAME = "Liberação imediata — Ebook Amoroso";
 
 export type SagacePayRuntimeConfig = {
+  gateway: "sagacepay" | "umbrella";
   apiKey: string;
   webhookSecret: string;
   baseUrl: string;
@@ -55,6 +56,7 @@ export type SaleResponse = {
 
 export async function getSagacePayRuntimeConfig(): Promise<SagacePayRuntimeConfig> {
   const settings = await readSagacePaySettings();
+  const gateway = settings?.gateway_provider === "sagacepay" ? "sagacepay" : "umbrella";
   const apiKey = settings?.api_key?.trim() || process.env["SAGACEPAY_API_KEY"] || "";
   const webhookSecret =
     settings?.webhook_secret?.trim() || process.env["SAGACEPAY_WEBHOOK_SECRET"] || "";
@@ -62,11 +64,15 @@ export async function getSagacePayRuntimeConfig(): Promise<SagacePayRuntimeConfi
   const configuredAmount = Number(settings?.amount ?? SAGACEPAY_AMOUNT);
   const productName = settings?.product_name?.trim() || SAGACEPAY_PRODUCT_NAME;
 
-  if (!apiKey && !(await getUmbrellaKey())) {
+  if (gateway === "sagacepay" && !apiKey) {
+    throw new SagacePayConfigError("SAGACEPAY_API_KEY não está configurada no servidor.");
+  }
+  if (gateway === "umbrella" && !(await getUmbrellaKey())) {
     throw new SagacePayConfigError("UMBRELLA_API_KEY não está configurada no servidor.");
   }
 
   return {
+    gateway,
     apiKey,
     webhookSecret,
     baseUrl: configuredBaseUrl.replace(/\/$/, ""),
@@ -150,6 +156,34 @@ export async function createSagacePaySale(input: CreateSaleInput): Promise<SaleR
   const config = await getSagacePayRuntimeConfig();
   const amount = input.amount ?? config.amount;
   const productName = input.productName ?? config.productName;
+  if (config.gateway === "sagacepay") {
+    const body: Record<string, unknown> = {
+      amount,
+      description: productName,
+      expirationInSeconds: 86400,
+      externalId: input.externalId,
+      customer: {
+        document: input.customer.document,
+        ...(input.customer.name ? { name: input.customer.name } : {}),
+        ...(input.customer.email ? { email: input.customer.email } : {}),
+        ...(input.customer.phone ? { phone: input.customer.phone } : {}),
+      },
+      items: [{ description: productName, quantity: 1, unitPrice: amount, tangible: false }],
+      ...(input.tracking && Object.keys(input.tracking).length > 0
+        ? { tracking: input.tracking }
+        : {}),
+    };
+    if (input.postbackUrl) body["postbackUrl"] = input.postbackUrl;
+    return sagacePayRequest(
+      "/sales",
+      {
+        method: "POST",
+        headers: { "idempotency-key": input.idempotencyKey },
+        body: JSON.stringify(body),
+      },
+      config,
+    );
+  }
   const umbrella = await createUmbrellaPix({
     amount: Math.round(amount * 100),
     customer: {
@@ -170,48 +204,13 @@ export async function createSagacePaySale(input: CreateSaleInput): Promise<SaleR
     pixCode: umbrella.qrcode,
     pixQrCode,
   };
-  /*
-  const body: Record<string, unknown> = {
-    amount,
-    description: productName,
-    expirationInSeconds: 86400,
-    externalId: input.externalId,
-    customer: {
-      document: input.customer.document,
-      ...(input.customer.name ? { name: input.customer.name } : {}),
-      ...(input.customer.email ? { email: input.customer.email } : {}),
-      ...(input.customer.phone ? { phone: input.customer.phone } : {}),
-    },
-    items: [
-      {
-        description: productName,
-        quantity: 1,
-        unitPrice: amount,
-        tangible: false,
-      },
-    ],
-    ...(input.tracking && Object.keys(input.tracking).length > 0
-      ? { tracking: input.tracking }
-      : {}),
-  };
-
-  if (input.postbackUrl) body["postbackUrl"] = input.postbackUrl;
-
-  return sagacePayRequest(
-    "/sales",
-    {
-      method: "POST",
-      headers: {
-        "idempotency-key": input.idempotencyKey,
-      },
-      body: JSON.stringify(body),
-    },
-    config,
-  );
-*/
 }
 
 export async function getSagacePaySale(id: string): Promise<SaleResponse> {
+  const config = await getSagacePayRuntimeConfig();
+  if (config.gateway === "sagacepay") {
+    return sagacePayRequest(`/sales/${encodeURIComponent(id)}`, { method: "GET" }, config);
+  }
   const transaction = await getUmbrellaTransaction(id);
   if (!transaction) throw new SagacePayApiError("Cobrança não encontrada.", 404);
   return {
@@ -307,13 +306,17 @@ export async function notifySaleEvent(input: SaleNotificationInput): Promise<boo
 
 // O webhook é sempre derivado do domínio da requisição: qualquer domínio
 // conectado ao projeto funciona sem configuração extra.
-export function webhookUrl(request: Request): string {
+export async function webhookUrl(request: Request): Promise<string> {
   const proto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || "https";
   const host =
     request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
     request.headers.get("host") ||
     "";
-  return `${proto}://${host}/api/public/umbrella-webhook`;
+  const gateway =
+    (await readSagacePaySettings())?.gateway_provider === "sagacepay" ? "sagacepay" : "umbrella";
+  return gateway === "sagacepay"
+    ? `${proto}://${host}/api/sagacepay/webhook`
+    : `${proto}://${host}/api/public/umbrella-webhook`;
 }
 
 export function toPublicApiError(error: unknown): { message: string; status: number } {

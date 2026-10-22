@@ -33,7 +33,7 @@ export const Route = createFileRoute("/api/admin/test-order")({
             customer,
             externalId: `wpp-test-${now}`,
             idempotencyKey: `admin-test-${now}`,
-            postbackUrl: webhookUrl(request),
+            postbackUrl: await webhookUrl(request),
             tracking: { utmSource: "admin", utmMedium: "test", utmCampaign: "admin_test_order" },
           });
           const saleId = typeof sale.id === "string" ? sale.id : `teste-${now}`;

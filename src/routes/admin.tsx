@@ -68,6 +68,7 @@ function AdminPage() {
     { date: string; paid: number; orders: number; revenue: number }[]
   >([]);
   const [settings, setSettings] = useState({
+    gateway: "umbrella" as "sagacepay" | "umbrella",
     apiKey: "",
     webhookSecret: "",
     utmfyApiToken: "",
@@ -127,6 +128,7 @@ function AdminPage() {
       setWebhookEndpoint(data.postbackUrl ?? "");
       setSettings((current) => ({
         ...current,
+        gateway: data.activeGateway === "sagacepay" ? "sagacepay" : "umbrella",
         utmfyApiToken: "",
         amount: String(data.amount ?? 137),
         notificationWebhookUrl: String(data.notificationWebhookUrl ?? ""),
@@ -963,6 +965,7 @@ function Settings({
   onSave,
 }: {
   settings: {
+    gateway: "sagacepay" | "umbrella";
     apiKey: string;
     webhookSecret: string;
     utmfyApiToken: string;
@@ -972,6 +975,7 @@ function Settings({
     productName: string;
   };
   setSettings: (value: {
+    gateway: "sagacepay" | "umbrella";
     apiKey: string;
     webhookSecret: string;
     utmfyApiToken: string;
@@ -1008,6 +1012,29 @@ function Settings({
           navegador.
         </p>
         <div className="mt-6 space-y-4">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">Gateway ativo</label>
+            <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-700 bg-slate-950 p-1">
+              <button
+                type="button"
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${settings.gateway === "umbrella" ? "bg-emerald-500 text-slate-950" : "text-slate-400 hover:bg-slate-800"}`}
+                onClick={() => setSettings({ ...settings, gateway: "umbrella" })}
+              >
+                UmbrellaPag
+              </button>
+              <button
+                type="button"
+                className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${settings.gateway === "sagacepay" ? "bg-emerald-500 text-slate-950" : "text-slate-400 hover:bg-slate-800"}`}
+                onClick={() => setSettings({ ...settings, gateway: "sagacepay" })}
+              >
+                SagacePay
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Novas cobranças e consultas usarão o gateway selecionado. O outro permanece
+              configurado como alternativa.
+            </p>
+          </div>
           <Field
             label="API Key"
             type="password"
