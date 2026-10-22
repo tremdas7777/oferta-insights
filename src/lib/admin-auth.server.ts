@@ -62,7 +62,7 @@ export function adminCookie(
   maxAge = SESSION_MAX_AGE_SECONDS,
   secure = true,
 ): string {
-  return `${COOKIE_NAME}=${token}; Path=/; Max-Age=${maxAge}; HttpOnly;${secure ? " Secure;" : ""} SameSite=Lax`;
+  return `${COOKIE_NAME}=${token}; Path=/; Max-Age=${maxAge}; HttpOnly;${secure ? " Secure;" : ""} SameSite=None`;
 }
 
 export function adminLogoutCookie(secure = true): string {

@@ -12,10 +12,13 @@ export const Route = createFileRoute("/api/admin/auth")({
   server: {
     handlers: {
       GET: async ({ request }) =>
-        Response.json({
-          authenticated: await isAdminRequest(request),
-          configured: isAdminPasswordConfigured(),
-        }),
+        new Response(
+          JSON.stringify({
+            authenticated: await isAdminRequest(request),
+            configured: isAdminPasswordConfigured(),
+          }),
+          { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } },
+        ),
       POST: async ({ request }) => {
         if (!isAdminPasswordConfigured()) {
           return Response.json(
@@ -32,7 +35,10 @@ export const Route = createFileRoute("/api/admin/auth")({
         const secure = new URL(request.url).protocol === "https:";
         return new Response(null, {
           status: 204,
-          headers: { "Set-Cookie": adminCookie(token, undefined, secure) },
+          headers: {
+            "Set-Cookie": adminCookie(token, undefined, secure),
+            "Cache-Control": "no-store",
+          },
         });
       },
       DELETE: async ({ request }) =>
