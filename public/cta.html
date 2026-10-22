@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="pt-BR">
 <head><meta charset="utf-8">
     
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQ4PBDPDH2"></script>
@@ -12,7 +12,7 @@
 
     
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Wpp">
+    <meta name="description" content="WPP — Relatório de análise do WhatsApp e acesso ao serviço no Brasil.">
     <title>WPP</title>
     <link rel="shortcut icon" href="/images/cta/logo.webp">
 
@@ -678,6 +678,54 @@
         }
         .secure-text { font-size: 11px; color: #9ca3af; margin-top: 12px; }
 
+        .pix-modal[hidden] { display: none; }
+        .pix-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(17,27,33,0.72);
+            backdrop-filter: blur(5px);
+        }
+        .pix-dialog {
+            width: min(100%, 440px);
+            max-height: min(92vh, 760px);
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.28);
+            position: relative;
+        }
+        .pix-dialog h3 { font-size: 22px; margin-bottom: 6px; color: var(--text); }
+        .pix-dialog-intro { color: var(--muted); font-size: 13px; line-height: 1.45; margin-bottom: 18px; }
+        .pix-close {
+            position: absolute; top: 12px; right: 14px; border: 0; background: transparent;
+            color: var(--muted); font-size: 28px; line-height: 1; cursor: pointer; padding: 6px;
+        }
+        .pix-field { display: block; text-align: left; margin-bottom: 12px; }
+        .pix-field span { display: block; font-size: 12px; font-weight: 800; margin-bottom: 5px; color: var(--text); }
+        .pix-field input {
+            width: 100%; border: 1px solid #d1d5db; border-radius: 12px; padding: 12px 13px;
+            font: inherit; font-size: 15px; color: var(--text); background: #fff;
+        }
+        .pix-field input:focus { outline: 2px solid rgba(37,211,102,0.32); border-color: #16a34a; }
+        .pix-required { color: #dc2626; }
+        .pix-submit { margin-top: 4px; font-size: 14px; padding: 15px 12px; }
+        .pix-error { color: #b91c1c; background: #fef2f2; border-radius: 10px; padding: 10px 12px; margin: 12px 0; font-size: 13px; line-height: 1.4; text-align: left; }
+        .pix-status { color: var(--muted); font-size: 13px; line-height: 1.45; margin: 14px 0; }
+        .pix-payment { text-align: center; }
+        .pix-payment h4 { font-size: 18px; color: #166534; margin-bottom: 5px; }
+        .pix-qr { display: block; width: 220px; height: 220px; object-fit: contain; margin: 14px auto; border: 1px solid #e5e7eb; border-radius: 12px; }
+        .pix-code { width: 100%; min-height: 84px; resize: vertical; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; font: 12px/1.4 monospace; color: var(--text); background: #f9fafb; }
+        .pix-copy { width: 100%; margin-top: 9px; border: 1px solid #16a34a; background: #f0fdf4; color: #166534; border-radius: 12px; padding: 11px; font-weight: 800; cursor: pointer; }
+        .pix-paid { color: #166534; background: #f0fdf4; border-radius: 12px; padding: 14px; font-weight: 700; line-height: 1.45; }
+        .pix-expired { color: #991b1b; background: #fef2f2; border-radius: 12px; padding: 14px; font-weight: 700; line-height: 1.45; }
+        .pix-back { width: 100%; margin-top: 12px; border: 0; background: #f3f4f6; color: var(--text); border-radius: 12px; padding: 11px; font-weight: 800; cursor: pointer; }
+
         
         .guarantee-box {
             display: flex;
@@ -851,14 +899,14 @@
 
 <div id="urgency-header">
     <div class="urgency-top">
-        <div class="urgency-title">⚠ ALERTA DE EMERGENCIA</div>
+        <div class="urgency-title">⚠ ALERTA DE EMERGÊNCIA</div>
         <div class="urgency-sub">
-            Finaliza el pago antes de que todos los datos encontrados sean
-            <strong>eliminados para siempre!</strong>
+            Finalize o pagamento antes que todos os dados encontrados sejam
+            <strong>excluídos para sempre!</strong>
         </div>
     </div>
     <div class="urgency-clock">
-        <span class="clock-label">Eliminando datos en</span>
+        <span class="clock-label">Exclusão dos dados em</span>
         <span id="countdown">10:00</span>
         <span class="clock-label">minutos</span>
     </div>
@@ -874,10 +922,10 @@
 
     
     <div class="emergency-alert">
-        <h2>⚠ ¡Tu relación puede estar en peligro!</h2>
+        <h2>⚠ Seu relacionamento pode estar em perigo!</h2>
         <p>
-            Nuestro algoritmo basado en datos, utilizando <strong>palabras y fotos</strong>,
-            detectó mensajes y archivos sospechosos en el WhatsApp de
+            Nosso algoritmo baseado em dados, usando <strong>palavras e fotos</strong>,
+            detectou mensagens e arquivos suspeitos no WhatsApp de
             <strong class="phone-display">+0000</strong>
         </p>
     </div>
@@ -901,7 +949,7 @@
                 <div class="profile-label">Número investigado</div>
                 <div class="profile-status">
                     <span class="status-dot"></span>
-                    WhatsApp activo
+                    WhatsApp ativo
                 </div>
             </div>
         </div>
@@ -910,23 +958,23 @@
     
     <div class="report-header">
         <p>
-            Nuestro sistema detectó que este número se comunica frecuentemente
-            con una persona ubicada cerca de <strong><span id="user-city" class="city-display" style="color:var(--danger);">tu ciudad</span></strong>
+            Nosso sistema detectou que este número se comunica frequentemente
+            com uma pessoa que está perto de <strong><span id="user-city" class="city-display" style="color:var(--danger);">sua cidade</span></strong>
         </p>
-        <span class="precision">Precisión del informe: 98%</span>
+        <span class="precision">Precisão do relatório: 98%</span>
         <div class="report-date" id="report-date"></div>
     </div>
 
     
     <div class="findings-card">
-        <h3>Resultados del análisis</h3>
+        <h3>Resultados da análise</h3>
 
         <div class="finding-item">
             <div class="finding-icon red">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             </div>
             <div class="finding-text">
-                Encontramos <span class="count">58</span> mensajes sospechosos en WhatsApp
+                Encontramos <span class="count">58</span> mensagens suspeitas no WhatsApp
             </div>
         </div>
 
@@ -935,7 +983,7 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div class="finding-text">
-                <span class="count">13</span> mensajes con la palabra <span class="keyword">"rico(a)"</span>
+                <span class="count">13</span> mensagens com a palavra <span class="keyword">"gostoso(a)"</span>
             </div>
         </div>
 
@@ -944,7 +992,7 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
             </div>
             <div class="finding-text">
-                <span class="count">41</span> mensajes con la palabra <span class="keyword">"amor"</span>
+                <span class="count">41</span> mensagens com a palavra <span class="keyword">"amor"</span>
             </div>
         </div>
 
@@ -953,7 +1001,7 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
             </div>
             <div class="finding-text">
-                <span class="count">20</span> fotos y <span class="count">5</span> videos están ocultos con una contraseña en el teléfono
+                <span class="count">20</span> fotos e <span class="count">5</span> vídeos estão ocultos por senha no celular
             </div>
         </div>
 
@@ -962,7 +1010,7 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div class="finding-text">
-                <span class="count">8</span> mensajes con la palabra <span class="keyword">"secreto"</span>
+                <span class="count">8</span> mensagens com a palavra <span class="keyword">"segredo"</span>
             </div>
         </div>
 
@@ -971,7 +1019,7 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
             </div>
             <div class="finding-text">
-                Hay un <strong>contacto no registrado</strong> que envía con frecuencia varios mensajes y dice que siente <span class="keyword">añoranza</span>
+                Há um <strong>contato não salvo</strong> que envia várias mensagens com frequência e diz que sente <span class="keyword">saudade</span>
             </div>
         </div>
 
@@ -980,7 +1028,7 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
             <div class="finding-text">
-                <span class="count">9</span> imágenes recibidas en <strong>visualización única</strong> fueron identificadas y restauradas
+                <span class="count">9</span> imagens recebidas em <strong>visualização única</strong> foram identificadas e recuperadas
             </div>
         </div>
 
@@ -989,7 +1037,7 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             </div>
             <div class="finding-text">
-                <span class="count">7</span> lugares sospechosos fueron detectados cerca de <span class="keyword city-display">...</span>
+                <span class="count">7</span> locais suspeitos foram detectados perto de <span class="keyword city-display">...</span>
             </div>
         </div>
 
@@ -998,17 +1046,17 @@
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5A11 11 0 0014.5 16L16 13.5l5 2v4a2 2 0 01-2 2A16 16 0 013 5a2 2 0 012-2"/></svg>
             </div>
             <div class="finding-text">
-                <span class="count">2</span> conversaciones archivadas fueron marcadas como <strong>sospechosas</strong>
+                <span class="count">2</span> conversas arquivadas foram marcadas como <strong>suspeitas</strong>
             </div>
         </div>
     </div>
 
     
     <div class="result-badge">
-        <strong class="badge-title">¡Espionaje 100% concluido!</strong>
+        <strong class="badge-title">Espionagem 100% concluída!</strong>
         <span class="badge-sub">
-            Encontramos contenido comprometedor<br>
-            en el WhatsApp de <span class="phone-hi" id="badge-phone">+0000</span>
+            Encontramos conteúdo comprometedor<br>
+            no WhatsApp de <span class="phone-hi" id="badge-phone">+0000</span>
         </span>
     </div>
 
@@ -1023,15 +1071,15 @@
         <div class="discovery-item">
             <div class="disc-alert-badge">
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-                MENSAJES BORRADOS ENCONTRADOS
+                MENSAGENS APAGADAS ENCONTRADAS
             </div>
             <div class="disc-header">
                 <h3 class="disc-title">
-                    Recuperamos <span class="accent">mensajes eliminados</span> del WhatsApp de <span class="phone-hi phone-display">+0000</span>
+                    Recuperamos <span class="accent">mensagens apagadas</span> do WhatsApp de <span class="phone-hi phone-display">+0000</span>
                 </h3>
                 <p class="disc-desc">
-                    Conversaciones que fueron borradas pero que <strong>nuestro sistema logró recuperar.</strong>
-                    <span class="phone-display">+0000</span> no sabe que las tenemos.
+                    Conversas que foram apagadas, mas que <strong>nosso sistema conseguiu recuperar.</strong>
+                    <span class="phone-display">+0000</span> não sabe que nós as temos.
                 </p>
             </div>
 
@@ -1057,7 +1105,7 @@
                     </div>
                     <div class="wa-topbar-info">
                         <div class="wa-topbar-name phone-display">+0000</div>
-                        <div class="wa-topbar-status">en línea</div>
+                        <div class="wa-topbar-status">online</div>
                     </div>
                     <div class="wa-topbar-actions">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.6 11.6L22 7v10l-6.4-4.6M2 5h12a2 2 0 012 2v10a2 2 0 01-2 2H2V5z"/></svg>
@@ -1070,22 +1118,22 @@
                 <div class="wa-chat-bg wa-screen-blur">
                     
                     <div class="wa-bubble wa-bubble-in">
-                        <div class="wa-bubble-text">Nuestro amor más grande con tanta añoranza &#x1F60D;</div>
+                        <div class="wa-bubble-text">Meu amor, estou morrendo de saudade &#x1F60D;</div>
                         <div class="wa-bubble-time">14:02</div>
                     </div>
                     
                     <div class="wa-bubble wa-bubble-out">
-                        <div class="wa-bubble-text">Quería verte más</div>
+                        <div class="wa-bubble-text">Queria te ver mais</div>
                         <div class="wa-bubble-time">14:03 <span class="wa-check">&#10003;&#10003;</span></div>
                     </div>
                     
                     <div class="wa-bubble wa-bubble-in">
-                        <div class="wa-bubble-text">También tengo mucha añoranza, pero sabes que no me es fácil salir</div>
+                        <div class="wa-bubble-text">Também estou com muita saudade, mas você sabe que não é fácil eu sair</div>
                         <div class="wa-bubble-time">14:04</div>
                     </div>
                     
                     <div class="wa-bubble wa-bubble-out">
-                        <div class="wa-bubble-text">Lo sé amor, pero arréglatelas para verme hoy &#x1F622;</div>
+                        <div class="wa-bubble-text">Eu sei, amor, mas dá um jeito de me ver hoje &#x1F622;</div>
                         <div class="wa-bubble-time">14:05 <span class="wa-check">&#10003;&#10003;</span></div>
                     </div>
                     
@@ -1110,12 +1158,12 @@
                     </div>
                     
                     <div class="wa-bubble wa-bubble-out">
-                        <div class="wa-bubble-text">Voy a arreglármelas, haré un tiempo para ir a verte &#x1F618;</div>
+                        <div class="wa-bubble-text">Vou dar um jeito, arrumar um tempinho para te ver &#x1F618;</div>
                         <div class="wa-bubble-time">14:08 <span class="wa-check">&#10003;&#10003;</span></div>
                     </div>
                     
                     <div class="wa-bubble wa-bubble-in">
-                        <div class="wa-bubble-text">Está bien, te estoy esperando &#x1F60D;&#x1F60D;&#x1F60D;&#x1F60D;</div>
+                        <div class="wa-bubble-text">Tá bom, estou te esperando &#x1F60D;&#x1F60D;&#x1F60D;&#x1F60D;</div>
                         <div class="wa-bubble-time">14:09</div>
                     </div>
                     
@@ -1144,7 +1192,7 @@
                     </div>
                     
                     <div class="wa-bubble wa-bubble-in">
-                        <div class="wa-bubble-text">También te amo &#x2764;&#xFE0F;&#x1F525;</div>
+                        <div class="wa-bubble-text">Também te amo &#x2764;&#xFE0F;&#x1F525;</div>
                         <div class="wa-bubble-time">14:11</div>
                     </div>
                     
@@ -1159,7 +1207,7 @@
                             <rect x="3" y="11" width="18" height="11" rx="2"/>
                             <path d="M7 11V7a5 5 0 0110 0v4"/>
                         </svg>
-                        <p>Conversación bloqueada</p>
+                        <p>Conversa bloqueada</p>
                     </div>
                 </div>
 
@@ -1167,7 +1215,7 @@
                 <div style="background:#1F2C34;padding:8px 10px;display:flex;align-items:center;gap:8px;">
                     <div style="background:#2A3942;flex:1;border-radius:20px;padding:8px 14px;display:flex;align-items:center;gap:8px;">
                         <svg width="20" height="20" fill="none" stroke="#8696A0" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
-                        <span style="font-size:13px;color:#8696A0;">Mensaje</span>
+                        <span style="font-size:13px;color:#8696A0;">Mensagem</span>
                         <div style="margin-left:auto;display:flex;gap:14px;">
                             <svg width="18" height="18" fill="none" stroke="#8696A0" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
                             <svg width="18" height="18" fill="none" stroke="#8696A0" stroke-width="1.5" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -1195,7 +1243,7 @@
                 
                 <div class="wa-contacts-tabs">
                     <div class="wa-contacts-tab active">Todas</div>
-                    <div class="wa-contacts-tab">No leídos</div>
+                    <div class="wa-contacts-tab">Não lidas</div>
                     <div class="wa-contacts-tab">Grupos</div>
                 </div>
                 
@@ -1216,7 +1264,7 @@
                         </div>
                         <div class="wa-contact-info">
                             <div class="wa-contact-name">+55 22 9<span style="filter:blur(4px);">XXXX-XXXX</span></div>
-                            <div class="wa-contact-last">¿Puedes amiga?</div>
+                            <div class="wa-contact-last">Pode, amiga?</div>
                         </div>
                         <div class="wa-contact-time">14:07</div>
                     </div>
@@ -1226,7 +1274,7 @@
                         </div>
                         <div class="wa-contact-info">
                             <div class="wa-contact-name">+55 22 9<span style="filter:blur(4px);">XXXX-XXXX</span></div>
-                            <div class="wa-contact-last">Hola ¿todo bien amigo?</div>
+                            <div class="wa-contact-last">Oi, tudo bem, amigo?</div>
                         </div>
                         <div class="wa-contact-time">13:58</div>
                     </div>
@@ -1238,7 +1286,7 @@
                         <rect x="3" y="11" width="18" height="11" rx="2"/>
                         <path d="M7 11V7a5 5 0 0110 0v4"/>
                     </svg>
-                    <p>Contactos bloqueados</p>
+                    <p>Contatos bloqueados</p>
                 </div>
             </div>
         </div>
@@ -1251,11 +1299,11 @@
             </div>
             <div class="disc-header">
                 <h3 class="disc-title">
-                    Encontramos <span class="accent">fotos enviadas en privado</span> por <span class="phone-hi phone-display">+0000</span>
+                    Encontramos <span class="accent">fotos enviadas em particular</span> por <span class="phone-hi phone-display">+0000</span>
                 </h3>
                 <p class="disc-desc">
-                    Imagens enviadas em conversas privadas que <strong>desaparecem apos serem abertas.</strong>
-                    Ya las guardamos para ti.
+                    Imagens enviadas em conversas privadas que <strong>desaparecem após serem abertas.</strong>
+                    Já salvamos para você.
                 </p>
             </div>
             <div class="photos-grid">
@@ -1299,23 +1347,23 @@
             <img src="/images/cta/logo.webp" alt="WPP" style="height:100px;width:auto;">
         </div>
         <div class="payment-desc">
-            Con <span class="accent">WPP</span> tendrás acceso completo al WhatsApp de tu pareja por solo:
+            Com <span class="accent">WPP</span> você terá acesso completo ao WhatsApp do seu parceiro ou parceira por apenas:
         </div>
         <div class="price-box">
-            <p class="price-old">De: US$97</p>
+            <div class="price-old">De R$&nbsp;197,00</div>
             <div style="line-height:1;">
-                <span class="price-new">US$37</span><span class="price-cents"></span>
+                <span class="price-new">R$&nbsp;137</span><span class="price-cents">,00</span>
             </div>
         </div>
         <a id="checkout-btn" href="https://checkout.payt.com.br/b4cad736dd5c804b6749b1c8400abe20?payment=pix&src=W-FRONT" class="checkout-btn checkout-link" style="text-decoration:none;display:block;text-align:center;">
-            DESBLOQUEAR ACCESO AHORA
+            DESBLOQUEAR ACESSO AGORA
         </a>
-        <p class="secure-text">Transacción 100% segura y anónima</p>
+        <p class="secure-text">Transação 100% segura e anônima</p>
         <div class="features-list">
-            <span class="feature-tag">Garantia 30 dias</span>
+            <span class="feature-tag">Garantia de 30 dias</span>
             <span class="feature-tag">Acesso por 1 ano</span>
-            <span class="feature-tag">Ate 3 numeros</span>
-            <span class="feature-tag">100% anónimo</span>
+            <span class="feature-tag">Até 3 números</span>
+            <span class="feature-tag">100% anônimo</span>
         </div>
     </div>
 
@@ -1326,16 +1374,16 @@
         <div class="discovery-item">
             <div class="disc-alert-badge green">
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                ULTIMA CONEXAO DETECTADA
+                ÚLTIMA CONEXÃO DETECTADA
             </div>
             <div class="disc-header">
                 <h3 class="disc-title">
-                    <span class="phone-hi phone-display">+0000</span> esteve en línea em um
-                    <span class="accent">horario distinto al que dijo</span>
+                    <span class="phone-hi phone-display">+0000</span> esteve online em um
+                    <span class="accent">horário diferente do que informou</span>
                 </h3>
                 <p class="disc-desc">
-                    Detectamos la hora exacta de la última conexión de <span class="phone-display">+0000</span>
-                    aunque tenga el estado <strong>"visto por última vez" oculto.</strong>
+                    Detectamos o horário exato da última conexão de <span class="phone-display">+0000</span>
+                    mesmo com o status <strong>"visto por último" oculto.</strong>
                 </p>
             </div>
             <div style="background:#0B141A;border-radius:14px;padding:16px;position:relative;overflow:hidden;">
@@ -1346,7 +1394,7 @@
                                 <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             </div>
                             <div>
-                                <div style="font-size:13px;font-weight:700;color:#e9edef;">02:47 AM</div>
+                                <div style="font-size:13px;font-weight:700;color:#e9edef;">02:47</div>
                                 <div style="font-size:11px;color:#8696A0;">Conectado durante 34 minutos</div>
                             </div>
                         </div>
@@ -1355,7 +1403,7 @@
                                 <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             </div>
                             <div>
-                                <div style="font-size:13px;font-weight:700;color:#e9edef;">11:32 PM</div>
+                                <div style="font-size:13px;font-weight:700;color:#e9edef;">23:32</div>
                                 <div style="font-size:11px;color:#8696A0;">Conectado durante 18 minutos</div>
                             </div>
                         </div>
@@ -1363,7 +1411,7 @@
                 </div>
                 <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(11,20,26,0.6);">
                     <svg width="28" height="28" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                    <p style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7);">Datos bloqueados</p>
+                    <p style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7);">Dados bloqueados</p>
                 </div>
             </div>
         </div>
@@ -1372,15 +1420,15 @@
         <div class="discovery-item">
             <div class="disc-alert-badge purple">
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                UBICACIÓN SOSPECHOSA DETECTADA
+                LOCALIZAÇÃO SUSPEITA DETECTADA
             </div>
             <div class="disc-header">
                 <h3 class="disc-title">
-                    <span class="phone-hi phone-display">+0000</span> compartió su <span class="accent">ubicación en secreto</span> anoche
+                    <span class="phone-hi phone-display">+0000</span> compartilhou sua <span class="accent">localização em segredo</span> ontem à noite
                 </h3>
                 <p class="disc-desc">
                     Detectamos que <span class="phone-display">+0000</span> esteve em um lugar diferente do que te disse.
-                    <strong>El mapa exacto está bloqueado hasta que confirmes tu acceso.</strong>
+                    <strong>O mapa exato está bloqueado até você confirmar seu acesso.</strong>
                 </p>
             </div>
             <div class="map-container" id="map-area">
@@ -1403,7 +1451,7 @@
                 </div>
                 <div class="map-lock-overlay">
                     <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                    <p>Ubicación bloqueada</p>
+                    <p>Localização bloqueada</p>
                 </div>
             </div>
         </div>
@@ -1412,14 +1460,14 @@
         <div class="discovery-item">
             <div class="disc-alert-badge orange">
                 <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
-                AUDIOS SOSPECHOSOS ENCONTRADOS
+                ÁUDIOS SUSPEITOS ENCONTRADOS
             </div>
             <div class="disc-header">
                 <h3 class="disc-title">
-                    Interceptamos <span class="accent">audios enviados</span> por <span class="phone-hi phone-display">+0000</span>
+                    Interceptamos <span class="accent">áudios enviados</span> por <span class="phone-hi phone-display">+0000</span>
                 </h3>
                 <p class="disc-desc">
-                    <span class="count" style="color:#ff6b6b;">12</span> audios fueron capturados y transcritos. Algunos contienen <strong>contenido íntimo y comprometedor.</strong>
+                    <span class="count" style="color:#ff6b6b;">12</span> áudios foram capturados e transcritos. Alguns contêm <strong>conteúdo íntimo e comprometedor.</strong>
                 </p>
             </div>
             <div style="background:#0B141A;border-radius:14px;padding:16px;position:relative;overflow:hidden;">
@@ -1467,7 +1515,7 @@
                 </div>
                 <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(11,20,26,0.6);">
                     <svg width="28" height="28" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                    <p style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7);">Audios bloqueados</p>
+                    <p style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7);">Áudios bloqueados</p>
                 </div>
             </div>
         </div>
@@ -1476,9 +1524,9 @@
     
     <div class="video-testimonials">
         <div class="vt-header">
-            <div class="vt-tag">⭐ Testimonios reales</div>
-            <h3>Mira quién ya descubrió <span class="accent">la verdad</span></h3>
-            <p>Personas reales contando cómo la app ayudó</p>
+            <div class="vt-tag">⭐ Depoimentos reais</div>
+            <h3>Veja quem já descobriu <span class="accent">a verdade</span></h3>
+            <p>Pessoas reais contando como o aplicativo ajudou</p>
         </div>
 
         <div class="vt-grid">
@@ -1486,7 +1534,7 @@
             <div class="vt-item">
                 <div class="vt-meta">
                     <div class="vt-info">
-                        <div class="vt-name">Mariana S.</div>
+                        <div class="vt-name">Mariana Silva — São Paulo, SP</div>
                         <div class="vt-meta-row">
                             <span class="vt-stars">★★★★★</span>
                             <span class="vt-verified">Verificado</span>
@@ -1502,7 +1550,7 @@
             <div class="vt-item">
                 <div class="vt-meta">
                     <div class="vt-info">
-                        <div class="vt-name">Carlos R.</div>
+                        <div class="vt-name">Carlos Ribeiro — Belo Horizonte, MG</div>
                         <div class="vt-meta-row">
                             <span class="vt-stars">★★★★★</span>
                             <span class="vt-verified">Verificado</span>
@@ -1518,7 +1566,7 @@
             <div class="vt-item">
                 <div class="vt-meta">
                     <div class="vt-info">
-                        <div class="vt-name">Juliana A.</div>
+                        <div class="vt-name">Juliana Almeida — Curitiba, PR</div>
                         <div class="vt-meta-row">
                             <span class="vt-stars">★★★★★</span>
                             <span class="vt-verified">Verificado</span>
@@ -1535,11 +1583,11 @@
     
     <div class="final-cta">
         <h2>Quer descobrir<br>a <span class="accent">verdade completa?</span></h2>
-        <p>Desbloquea ahora todos los mensajes, fotos, ubicaciones y horarios reales de conexión.</p>
+        <p>Desbloqueie agora todas as mensagens, fotos, localizações e horários reais de conexão.</p>
         <a href="https://checkout.payt.com.br/b4cad736dd5c804b6749b1c8400abe20?payment=pix&src=W-FRONT" class="checkout-btn checkout-link" style="max-width:360px;margin:0 auto;text-decoration:none;display:block;text-align:center;">
-            QUIERO SABER LA VERDAD AHORA
+            QUERO SABER A VERDADE AGORA
         </a>
-        <p class="secure-text" style="margin-top:14px;">100% anónimo · Sin rastros · Acceso inmediato</p>
+        <p class="secure-text" style="margin-top:14px;">100% anônimo · Sem rastros · Acesso imediato</p>
     </div>
 
 </div>
@@ -1562,8 +1610,8 @@
 
     
     var now = new Date();
-    var dateStr = now.toLocaleDateString('es') + ' ' + now.toLocaleTimeString('es');
-    document.getElementById('report-date').textContent = 'Informe generado el: ' + dateStr;
+    var dateStr = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR');
+    document.getElementById('report-date').textContent = 'Relatório gerado em: ' + dateStr;
 
     
     var imgEl  = document.getElementById('cta-avatar-photo');
@@ -1660,7 +1708,7 @@
             } catch (e) {}
         }
         if (!document.getElementById('user-city').textContent || document.getElementById('user-city').textContent === '...') {
-            applyCity('tu ciudad');
+            applyCity('sua cidade');
         }
     })();
 })();
@@ -1784,6 +1832,7 @@
         var utmKeys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','sck','xcod'];
 
         document.querySelectorAll('a.checkout-link').forEach(function(a) {
+            if ((a.getAttribute('href') || '').charAt(0) === '#') return;
             var url = new URL(a.href);
             var needsFix = url.searchParams.get('src') !== FORCED_SRC;
             if (!needsFix) { fixing = false; return; }
@@ -1820,6 +1869,7 @@
         if (!id) { try { id = localStorage.getItem('wa_consulta'); } catch (e) {} }
         if (!id) return;
         document.querySelectorAll('a.checkout-link').forEach(function(a) {
+            if ((a.getAttribute('href') || '').charAt(0) === '#') return;
             var url = new URL(a.href);
             if (url.searchParams.get('zr') === id) return;
             url.searchParams.set('zr', id);
@@ -1839,7 +1889,8 @@
         marcarCheckout();
         if (++count >= 45) clearInterval(iv);
     }, 2000);
-})();
+    })();
 </script>
+
 </body>
 </html>

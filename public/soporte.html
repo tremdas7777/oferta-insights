@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Soporte al consumidor — WPP</title>
-<meta name="description" content="Soporte al consumidor, ayuda y contacto de WPP.">
+<title>Suporte ao consumidor — WPP</title>
+<meta name="description" content="Suporte ao consumidor, ajuda e contato do WPP.">
 <link rel="shortcut icon" href="/images/logo.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -164,61 +164,61 @@ textarea { min-height: 120px; resize: vertical; }
       <div class="brand-mark"><img src="/images/logo.webp" alt="WPP"></div>
       <div>
         <div class="brand-name">WPP</div>
-        <div class="brand-tag">Soporte al consumidor</div>
+        <div class="brand-tag">Suporte ao consumidor</div>
       </div>
     </a>
   </header>
 
   <section class="shell">
-    <h1>Soporte al consumidor</h1>
-    <p class="lead">¿Necesitas ayuda con el servicio, un reembolso o tienes una duda? Estamos aquí para ayudarte.</p>
+    <h1>Suporte ao consumidor</h1>
+    <p class="lead">Precisa de ajuda com o serviço, quer solicitar um reembolso ou tem alguma dúvida? Estamos aqui para ajudar.</p>
 
-    <h2>Canales de contacto</h2>
+    <h2>Canais de contato</h2>
     <div class="card">
-      <strong>Correo de soporte</strong>
+      <strong>E-mail de suporte</strong>
       <a href="mailto:soporte@wpp.help">soporte@wpp.help</a>
-      <p style="margin-top:8px;font-size:0.9rem;color:var(--muted)">Tiempo de respuesta habitual: hasta 48 horas hábiles.</p>
+      <p style="margin-top:8px;font-size:0.9rem;color:var(--muted)">Prazo habitual de resposta: até 48 horas úteis.</p>
     </div>
 
-    <h2>Horario de atención</h2>
-    <p>Lunes a viernes, 9:00–18:00 (hora de Ciudad de México, UTC−6). Los mensajes recibidos fuera de horario se responden el siguiente día hábil.</p>
+    <h2>Horário de atendimento</h2>
+    <p>De segunda a sexta, das 9h às 18h (horário de Brasília, UTC−3). As mensagens recebidas fora desse horário são respondidas no próximo dia útil.</p>
 
-    <h2>Temas frecuentes</h2>
+    <h2>Dúvidas frequentes</h2>
     <ul>
-      <li>Acceso al servicio y problemas técnicos en la página.</li>
-      <li>Dudas sobre el análisis o el video explicativo.</li>
-      <li>Solicitudes de privacidad (acceso, corrección o eliminación de datos).</li>
-      <li>Reembolsos o cargos (si aplican según tu compra).</li>
+      <li>Acesso ao serviço e problemas técnicos na página.</li>
+      <li>Dúvidas sobre a análise ou o vídeo explicativo.</li>
+      <li>Solicitações de privacidade (acesso, correção ou exclusão de dados).</li>
+      <li>Reembolsos ou cobranças (quando aplicável à sua compra).</li>
     </ul>
 
-    <h2>Envíanos un mensaje</h2>
+    <h2>Envie uma mensagem</h2>
     <form id="supportForm" novalidate>
-      <div class="field-label">Nombre</div>
-      <input id="name" name="name" type="text" autocomplete="name" placeholder="Tu nombre" required>
+      <div class="field-label">Nome</div>
+      <input id="name" name="name" type="text" autocomplete="name" placeholder="Seu nome" required>
 
-      <div class="field-label">Correo electrónico</div>
-      <input id="email" name="email" type="email" autocomplete="email" placeholder="tu@email.com" required>
+      <div class="field-label">E-mail</div>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="seu@email.com" required>
 
-      <div class="field-label">Asunto</div>
+      <div class="field-label">Assunto</div>
       <select id="topic" name="topic" required>
-        <option value="">Selecciona un tema</option>
+        <option value="">Selecione um assunto</option>
         <option value="tecnico">Problema técnico</option>
-        <option value="cuenta">Acceso / servicio</option>
-        <option value="privacidad">Privacidad y datos</option>
-        <option value="reembolso">Reembolso / pago</option>
-        <option value="otro">Otro</option>
+        <option value="cuenta">Acesso / serviço</option>
+        <option value="privacidad">Privacidade e dados</option>
+        <option value="reembolso">Reembolso / pagamento</option>
+        <option value="otro">Outro</option>
       </select>
 
-      <div class="field-label">Mensaje</div>
-      <textarea id="message" name="message" placeholder="Cuéntanos qué necesitas…" required></textarea>
+      <div class="field-label">Mensagem</div>
+      <textarea id="message" name="message" placeholder="Conte como podemos ajudar…" required></textarea>
 
-      <button type="submit" class="btn" id="sendBtn">Enviar solicitud</button>
+      <button type="submit" class="btn" id="sendBtn">Enviar solicitação</button>
       <div id="formMsg" class="msg" role="status"></div>
     </form>
 
     <div class="links">
-      <a href="/index.html">← Volver al inicio</a>
-      <a href="/privacidad.html">Política de privacidad</a>
+      <a href="/index.html">← Voltar ao início</a>
+      <a href="/privacidad.html">Política de privacidade</a>
     </div>
   </section>
 </div>
@@ -239,23 +239,23 @@ textarea { min-height: 120px; resize: vertical; }
     var message = document.getElementById('message').value.trim();
 
     if (!name || !email || !topic || !message) {
-      msg.textContent = 'Completa todos los campos para continuar.';
+      msg.textContent = 'Preencha todos os campos para continuar.';
       msg.classList.add('show', 'err');
       return;
     }
 
-    var subject = encodeURIComponent('[Soporte WPP] ' + topic + ' — ' + name);
+    var subject = encodeURIComponent('[Suporte WPP] ' + topic + ' — ' + name);
     var body = encodeURIComponent(
-      'Nombre: ' + name + '\n' +
+      'Nome: ' + name + '\n' +
       'Email: ' + email + '\n' +
-      'Asunto: ' + topic + '\n\n' +
+      'Assunto: ' + topic + '\n\n' +
       message
     );
 
     btn.disabled = true;
     window.location.href = 'mailto:soporte@wpp.help?subject=' + subject + '&body=' + body;
 
-    msg.textContent = 'Se abrió tu correo para enviar la solicitud. Si no se abre, escribe a soporte@wpp.help.';
+    msg.textContent = 'Seu aplicativo de e-mail foi aberto para enviar a solicitação. Se ele não abrir, escreva para soporte@wpp.help.';
     msg.classList.add('show');
     setTimeout(function () { btn.disabled = false; }, 1500);
   });
