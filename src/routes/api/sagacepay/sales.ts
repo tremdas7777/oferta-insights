@@ -9,8 +9,22 @@ import {
 import { recordOrder } from "@/lib/admin-data.server";
 
 const MAX_TEXT_LENGTH = 160;
-const DOCUMENT_PATTERN = /^(?:\d{11}|\d{14})$/;
+const DOCUMENT_PATTERN = /^\d{11}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidCpf(document: string): boolean {
+  if (!DOCUMENT_PATTERN.test(document) || /^(\d)\1{10}$/.test(document)) return false;
+  let first = 0;
+  let second = 0;
+  for (let index = 0; index < 9; index += 1) first += Number(document[index]) * (10 - index);
+  let firstCheck = (first * 10) % 11;
+  if (firstCheck === 10) firstCheck = 0;
+  if (firstCheck !== Number(document[9])) return false;
+  for (let index = 0; index < 10; index += 1) second += Number(document[index]) * (11 - index);
+  let secondCheck = (second * 10) % 11;
+  if (secondCheck === 10) secondCheck = 0;
+  return secondCheck === Number(document[10]);
+}
 
 function optionalText(value: unknown, maxLength = MAX_TEXT_LENGTH): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -39,8 +53,8 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
           const idempotencyKey = optionalText(input["idempotencyKey"], 120);
           const externalId = optionalText(input["externalId"], 120);
 
-          if (!document || !DOCUMENT_PATTERN.test(document)) {
-            return jsonError("Informe um CPF ou CNPJ válido para gerar o PIX.", 400);
+          if (!isValidCpf(document)) {
+            return jsonError("Informe um CPF válido para gerar o PIX.", 400);
           }
           if (!idempotencyKey || !externalId) {
             return jsonError(
@@ -51,8 +65,15 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
           const email = optionalText(customer["email"], 240);
           const name = optionalText(customer["name"]);
           const phone = optionalText(customer["phone"], 40);
-          if (email && !EMAIL_PATTERN.test(email)) {
+          if (!name || name.length < 3) {
+            return jsonError("Informe seu nome completo.", 400);
+          }
+          if (!email || !EMAIL_PATTERN.test(email)) {
             return jsonError("Informe um e-mail válido.", 400);
+          }
+          const phoneDigits = phone?.replace(/\D/g, "") ?? "";
+          if (!phone || (phoneDigits.length !== 10 && phoneDigits.length !== 11)) {
+            return jsonError("Informe um telefone válido com DDD.", 400);
           }
 
           const trackingInput = (input["tracking"] ?? {}) as Record<string, unknown>;
@@ -83,9 +104,9 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
           const saleInput: CreateSaleInput = {
             customer: {
               document,
-              ...(name ? { name } : {}),
-              ...(email ? { email } : {}),
-              ...(phone ? { phone } : {}),
+              name,
+              email,
+              phone: phoneDigits,
             },
             externalId,
             idempotencyKey,
