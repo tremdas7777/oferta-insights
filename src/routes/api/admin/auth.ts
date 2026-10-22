@@ -32,7 +32,9 @@ export const Route = createFileRoute("/api/admin/auth")({
           return Response.json({ error: "Senha inválida." }, { status: 401 });
         }
         const token = await createAdminSession();
-        const secure = new URL(request.url).protocol === "https:";
+        const secure =
+          new URL(request.url).protocol === "https:" ||
+          request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() === "https";
         return new Response(null, {
           status: 204,
           headers: {
@@ -41,11 +43,15 @@ export const Route = createFileRoute("/api/admin/auth")({
           },
         });
       },
-      DELETE: async ({ request }) =>
-        new Response(null, {
+      DELETE: async ({ request }) => {
+        const secure =
+          new URL(request.url).protocol === "https:" ||
+          request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() === "https";
+        return new Response(null, {
           status: 204,
-          headers: { "Set-Cookie": adminLogoutCookie(new URL(request.url).protocol === "https:") },
-        }),
+          headers: { "Set-Cookie": adminLogoutCookie(secure) },
+        });
+      },
     },
   },
 });
