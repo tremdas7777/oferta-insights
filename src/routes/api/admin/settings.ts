@@ -57,11 +57,11 @@ export const Route = createFileRoute("/api/admin/settings")({
         const apiKey =
           typeof body["apiKey"] === "string" && body["apiKey"].trim()
             ? body["apiKey"].trim()
-            : current.api_key;
+            : current.api_key?.trim() || process.env["SAGACEPAY_API_KEY"] || "";
         const webhookSecret =
           typeof body["webhookSecret"] === "string" && body["webhookSecret"].trim()
             ? body["webhookSecret"].trim()
-            : current.webhook_secret;
+            : current.webhook_secret?.trim() || process.env["SAGACEPAY_WEBHOOK_SECRET"] || "";
         const amount = Number(body["amount"] ?? current.amount ?? 137);
         const notificationWebhookUrl =
           typeof body["notificationWebhookUrl"] === "string"
