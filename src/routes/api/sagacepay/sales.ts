@@ -7,8 +7,16 @@ import {
   type CreateSaleInput,
 } from "@/lib/sagacepay.server";
 import { recordOrder } from "@/lib/admin-data.server";
+import { sendUtmfyOrder } from "@/lib/utmfy.server";
+import {
+  checkPublicRateLimit,
+  getClientKey,
+  rateLimitResponse,
+  reserveIdempotencyKey,
+} from "@/lib/public-rate-limit.server";
 
 const MAX_TEXT_LENGTH = 160;
+const MAX_BODY_BYTES = 16_000;
 const DOCUMENT_PATTERN = /^\d{11}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -46,6 +54,13 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
     handlers: {
       POST: async ({ request }) => {
         try {
+          const limit = checkPublicRateLimit(`sale:${getClientKey(request)}`, {
+            limit: 5,
+            windowMs: 10 * 60_000,
+          });
+          if (!limit.allowed) return rateLimitResponse(limit.retryAfterSeconds);
+          const contentLength = Number(request.headers.get("content-length") ?? 0);
+          if (contentLength > MAX_BODY_BYTES) return jsonError("Solicitação muito grande.", 413);
           const input = (await request.json()) as Record<string, unknown>;
           const customer = (input["customer"] ?? {}) as Record<string, unknown>;
           const document =
@@ -75,6 +90,9 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
           if (!phone || (phoneDigits.length !== 10 && phoneDigits.length !== 11)) {
             return jsonError("Informe um telefone válido com DDD.", 400);
           }
+          if (!reserveIdempotencyKey(idempotencyKey)) {
+            return jsonError("Esta cobrança já foi processada. Aguarde o resultado do PIX.", 409);
+          }
 
           const trackingInput = (input["tracking"] ?? {}) as Record<string, unknown>;
           const tracking: Record<string, string> = {};
@@ -84,6 +102,9 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
             "utmCampaign",
             "utmContent",
             "utmTerm",
+            "src",
+            "sck",
+            "xcod",
             "fbclid",
             "ttclid",
             "gclid",
@@ -116,6 +137,7 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
 
           const sale = await createSagacePaySale(saleInput);
           if (typeof sale.id === "string") {
+            const createdAt = new Date().toISOString();
             const amount = typeof sale.amount === "number" ? sale.amount : 137;
             const status = typeof sale.status === "string" ? sale.status : "pending";
             try {
@@ -125,7 +147,7 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
                 status,
                 amount,
                 customer: saleInput.customer,
-                rawData: sale,
+                rawData: { ...sale, utmfyCreatedAt: createdAt },
                 tracking,
               });
             } catch (storageError) {
@@ -138,6 +160,14 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
               status: "pending",
               amount,
               customer: saleInput.customer,
+            });
+            await sendUtmfyOrder({
+              orderId: sale.id,
+              status: "waiting_payment",
+              amount,
+              customer: saleInput.customer,
+              tracking,
+              createdAt,
             });
           }
           return Response.json({

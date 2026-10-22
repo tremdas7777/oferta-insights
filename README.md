@@ -22,3 +22,9 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Integração com a UTMfy
+
+O checkout envia o pedido PIX como `waiting_payment` e o webhook da SagacePay atualiza o mesmo pedido para `paid` na UTMfy. Para ativar o envio, copie `.env.example` para `.env` e configure `UTMFY_API_TOKEN` com uma credencial criada em **Integrações → Webhooks → Credenciais de API** na UTMfy.
+
+São enviados `src`, `sck`, `utm_source`, `utm_campaign`, `utm_medium`, `utm_content` e `utm_term`, além dos dados do cliente e do produto.

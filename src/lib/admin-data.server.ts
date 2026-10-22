@@ -49,7 +49,8 @@ export async function saveSagacePaySettings(settings: SagacePaySettings): Promis
 export async function recordOrder(input: OrderInput): Promise<void> {
   const now = new Date().toISOString();
   let previousTracking: Record<string, string> = {};
-  if (!input.tracking) {
+  let previousRawData: Record<string, unknown> = {};
+  if (!input.tracking || input.rawData) {
     const { data: existing } = await adminDb()
       .from("sagacepay_orders")
       .select("raw_data")
@@ -57,6 +58,7 @@ export async function recordOrder(input: OrderInput): Promise<void> {
       .maybeSingle();
     const existingRaw = existing?.raw_data;
     if (existingRaw && typeof existingRaw === "object" && !Array.isArray(existingRaw)) {
+      previousRawData = existingRaw as Record<string, unknown>;
       const stored = (existingRaw as Record<string, unknown>)["tracking"];
       if (stored && typeof stored === "object" && !Array.isArray(stored)) {
         previousTracking = stored as Record<string, string>;
@@ -79,6 +81,7 @@ export async function recordOrder(input: OrderInput): Promise<void> {
         paid_at: input.paidAt ?? (input.status === "paid" ? now : null),
         updated_at: now,
         raw_data: {
+          ...previousRawData,
           ...(input.rawData && typeof input.rawData === "object" && !Array.isArray(input.rawData)
             ? (input.rawData as Record<string, unknown>)
             : { gateway_response: input.rawData ?? {} }),
@@ -88,6 +91,16 @@ export async function recordOrder(input: OrderInput): Promise<void> {
       { onConflict: "sale_id" },
     );
   if (error) throw error;
+}
+
+export async function readOrder(saleId: string) {
+  const { data, error } = await adminDb()
+    .from("sagacepay_orders")
+    .select("*")
+    .eq("sale_id", saleId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 export type FunnelEventInput = {

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getWebhookSecret, notifySaleEvent } from "@/lib/sagacepay.server";
-import { recordOrder } from "@/lib/admin-data.server";
+import { readOrder, recordOrder } from "@/lib/admin-data.server";
+import { sendUtmfyOrder, statusFromGateway } from "@/lib/utmfy.server";
 
 const REPLAY_WINDOW_SECONDS = 300;
 
@@ -90,6 +91,39 @@ export const Route = createFileRoute("/api/sagacepay/webhook")({
               ? payload.data.status
               : event.replace("sale.", "");
           const amount = typeof payload.data.amount === "number" ? payload.data.amount : 137;
+          let previousOrder: { raw_data?: unknown; created_at?: string } | null = null;
+          try {
+            previousOrder = await readOrder(saleId);
+          } catch (readError) {
+            console.warn("[SagacePay] unable to read original order metadata", readError);
+          }
+          const previousRawData =
+            previousOrder?.raw_data &&
+            typeof previousOrder.raw_data === "object" &&
+            !Array.isArray(previousOrder.raw_data)
+              ? (previousOrder.raw_data as Record<string, unknown>)
+              : {};
+          const createdAt =
+            typeof previousRawData.utmfyCreatedAt === "string"
+              ? previousRawData.utmfyCreatedAt
+              : typeof previousOrder?.created_at === "string"
+                ? previousOrder.created_at
+                : new Date().toISOString();
+          const customer = payload.data.customer;
+          const customerDetails = customer
+            ? {
+                ...(typeof customer.name === "string" ? { name: customer.name } : {}),
+                ...(typeof customer.email === "string" ? { email: customer.email } : {}),
+                ...(typeof customer.document === "string" ? { document: customer.document } : {}),
+                ...(typeof customer.phone === "string" ? { phone: customer.phone } : {}),
+              }
+            : undefined;
+          const tracking =
+            previousRawData.tracking &&
+            typeof previousRawData.tracking === "object" &&
+            !Array.isArray(previousRawData.tracking)
+              ? (previousRawData.tracking as Record<string, string>)
+              : undefined;
           try {
             await recordOrder({
               saleId,
@@ -107,16 +141,17 @@ export const Route = createFileRoute("/api/sagacepay/webhook")({
               { status: 500 },
             );
           }
+          await sendUtmfyOrder({
+            orderId: saleId,
+            status: statusFromGateway(status),
+            amount,
+            customer: customerDetails,
+            tracking,
+            createdAt,
+            approvedDate:
+              event === "sale.paid" || status === "paid" ? new Date().toISOString() : null,
+          });
           if (event === "sale.paid" || status === "paid") {
-            const customer = payload.data.customer;
-            const customerDetails = customer
-              ? {
-                  ...(typeof customer.name === "string" ? { name: customer.name } : {}),
-                  ...(typeof customer.email === "string" ? { email: customer.email } : {}),
-                  ...(typeof customer.document === "string" ? { document: customer.document } : {}),
-                  ...(typeof customer.phone === "string" ? { phone: customer.phone } : {}),
-                }
-              : undefined;
             const paidExternalId =
               typeof payload.data.externalId === "string" ? payload.data.externalId : undefined;
             await notifySaleEvent({

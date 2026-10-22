@@ -1615,7 +1615,7 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
         <button type="button" class="pix-close" id="pix-close" aria-label="Fechar">&times;</button>
         <div id="pix-form-view">
             <h3 id="pix-dialog-title">Pague com PIX</h3>
-            <p class="pix-dialog-intro">Informe seus dados para gerar o PIX de R$ 137,00. O CPF/CNPJ é solicitado pela instituição de pagamento.</p>
+            <p class="pix-dialog-intro">Informe seus dados para gerar o PIX de <span id="pix-amount">R$ 137,00</span>. O CPF é solicitado pela instituição de pagamento.</p>
             <form id="pix-form" novalidate>
                 <label class="pix-field"><span>Nome completo <b class="pix-required">*</b></span><input id="pix-name" name="name" type="text" autocomplete="name" maxlength="160" required aria-required="true"></label>
                 <label class="pix-field"><span>CPF <b class="pix-required">*</b></span><input id="pix-document" name="document" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14" required aria-required="true"></label>
@@ -1959,6 +1959,25 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
     var documentInput = document.getElementById('pix-document');
     var emailInput = document.getElementById('pix-email');
     var phoneInput = document.getElementById('pix-phone');
+    var amountLabel = document.getElementById('pix-amount');
+    var currentAmount = 137;
+
+    function formatAmount(value) {
+        return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    async function loadCheckoutConfig() {
+        try {
+            var response = await fetch('/api/sagacepay/config', { headers: { 'Accept': 'application/json' } });
+            if (!response.ok) return;
+            var config = await response.json();
+            if (typeof config.amount === 'number' && Number.isFinite(config.amount) && config.amount > 0) {
+                currentAmount = config.amount;
+                amountLabel.textContent = formatAmount(currentAmount);
+            }
+        } catch (e) {}
+    }
+    loadCheckoutConfig();
 
     function trackFunnelEvent(eventName, metadata) {
         var sessionId = '';
@@ -2048,7 +2067,7 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
         var tracking = {};
         var queryToPayload = {
             utm_source: 'utmSource', utm_medium: 'utmMedium', utm_campaign: 'utmCampaign',
-            utm_content: 'utmContent', utm_term: 'utmTerm', fbclid: 'fbclid',
+            utm_content: 'utmContent', utm_term: 'utmTerm', src: 'src', fbclid: 'fbclid',
             ttclid: 'ttclid', gclid: 'gclid', sck: 'sck', xcod: 'xcod'
         };
         Object.keys(queryToPayload).forEach(function (key) {

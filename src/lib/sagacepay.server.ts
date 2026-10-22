@@ -13,6 +13,11 @@ export type SagacePayRuntimeConfig = {
   productName: string;
 };
 
+export type SagacePayPublicConfig = {
+  amount: number;
+  productName: string;
+};
+
 type SagacePayErrorPayload = {
   message?: unknown;
   statusCode?: unknown;
@@ -68,6 +73,18 @@ export async function getSagacePayRuntimeConfig(): Promise<SagacePayRuntimeConfi
   };
 }
 
+export async function getSagacePayPublicConfig(): Promise<SagacePayPublicConfig> {
+  const settings = await readSagacePaySettings();
+  const configuredAmount = Number(settings?.amount ?? SAGACEPAY_AMOUNT);
+  return {
+    amount:
+      Number.isFinite(configuredAmount) && configuredAmount > 0
+        ? configuredAmount
+        : SAGACEPAY_AMOUNT,
+    productName: settings?.product_name?.trim() || SAGACEPAY_PRODUCT_NAME,
+  };
+}
+
 export class SagacePayConfigError extends Error {
   readonly code = "SAGACEPAY_NOT_CONFIGURED";
 }
@@ -94,11 +111,12 @@ async function parseApiResponse(response: Response): Promise<SaleResponse> {
 
   if (!response.ok) {
     const detail = payload.message ?? payload.error ?? payload.errors;
-    const message = typeof detail === "string"
-      ? detail
-      : detail
-        ? `A SagacePay recusou a solicitação: ${JSON.stringify(detail)}`
-        : `A SagacePay respondeu com HTTP ${response.status}.`;
+    const message =
+      typeof detail === "string"
+        ? detail
+        : detail
+          ? `A SagacePay recusou a solicitação: ${JSON.stringify(detail)}`
+          : `A SagacePay respondeu com HTTP ${response.status}.`;
     throw new SagacePayApiError(message, response.status);
   }
 
