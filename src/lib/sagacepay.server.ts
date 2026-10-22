@@ -120,8 +120,8 @@ async function parseApiResponse(response: Response): Promise<SaleResponse> {
       typeof detail === "string"
         ? detail
         : detail
-          ? `A SagacePay recusou a solicitação: ${JSON.stringify(detail)}`
-          : `A SagacePay respondeu com HTTP ${response.status}.`;
+          ? `A UmbrellaPag recusou a solicitação: ${JSON.stringify(detail)}`
+          : `A UmbrellaPag respondeu com HTTP ${response.status}.`;
     throw new SagacePayApiError(message, response.status);
   }
 
@@ -320,7 +320,7 @@ export function toPublicApiError(error: unknown): { message: string; status: num
   if (error instanceof SagacePayConfigError) {
     return {
       message:
-        "O pagamento ainda não está configurado. Configure a integração SagacePay no servidor.",
+        "O pagamento ainda não está configurado. Configure a chave da UmbrellaPag no servidor.",
       status: 503,
     };
   }
@@ -328,14 +328,14 @@ export function toPublicApiError(error: unknown): { message: string; status: num
   if (error instanceof SagacePayApiError) {
     if (error.status === 401 || error.status === 403) {
       return {
-        message: "A configuração da SagacePay foi rejeitada. Verifique a API key no servidor.",
+        message: "A configuração da UmbrellaPag foi rejeitada. Verifique a chave no servidor.",
         status: 502,
       };
     }
     if (error.status === 429) {
       return {
         message:
-          "A SagacePay recebeu muitas tentativas. Aguarde alguns instantes e tente novamente.",
+          "A UmbrellaPag recebeu muitas tentativas. Aguarde alguns instantes e tente novamente.",
         status: 429,
       };
     }

@@ -357,7 +357,7 @@ function AdminPage() {
               try {
                 const result = await request("/api/admin/test-order", { method: "POST" });
                 setTestOrderMessage(
-                  `SagacePay respondeu e criou o pedido ${result.id} como ${result.status}. ${result.notified ? "A notificação Pushcut foi enviada." : "O pedido foi criado, mas o Pushcut ainda não está configurado."}`,
+                  `UmbrellaPag respondeu e criou o pedido ${result.id} como ${result.status}. ${result.notified ? "A notificação Pushcut foi enviada." : "O pedido foi criado, mas o Pushcut ainda não está configurado."}`,
                 );
                 await loadDashboard();
               } catch (cause) {
@@ -1002,7 +1002,7 @@ function Settings({
   return (
     <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
       <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-        <h2 className="font-semibold">Configuração da SagacePay</h2>
+        <h2 className="font-semibold">Configuração do pagamento e integrações</h2>
         <p className="mt-1 text-sm leading-6 text-slate-500">
           Os segredos são gravados apenas no backend. Depois de salvos, não são devolvidos ao
           navegador.

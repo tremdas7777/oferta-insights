@@ -69,7 +69,10 @@ export const Route = createFileRoute("/api/admin/test-order")({
         } catch (error) {
           console.error("[Admin] test order failed", error);
           const publicError = toPublicApiError(error);
-          return Response.json({ error: `Teste do gateway falhou: ${publicError.message}` }, { status: publicError.status });
+          return Response.json(
+            { error: `Teste da UmbrellaPag falhou: ${publicError.message}` },
+            { status: publicError.status },
+          );
         }
       },
     },
