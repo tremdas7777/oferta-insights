@@ -24,10 +24,16 @@ export const Route = createFileRoute("/api/funnel/events")({
             path: typeof body.path === "string" ? body.path.slice(0, 200) : undefined,
             metadata,
           });
-          return new Response(null, { status: 204 });
+          return new Response(null, {
+            status: 204,
+            headers: { "Cache-Control": "no-store" },
+          });
         } catch (error) {
           console.warn("[Funnel] unable to record event", error);
-          return new Response(null, { status: 204 });
+          return Response.json(
+            { error: "Não foi possível registrar o evento do funil." },
+            { status: 503, headers: { "Cache-Control": "no-store" } },
+          );
         }
       },
     },

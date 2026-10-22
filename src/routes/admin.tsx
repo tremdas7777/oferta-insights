@@ -626,6 +626,7 @@ function LiveView({ events, onRefresh }: { events: FunnelEvent[]; onRefresh: () 
       <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
         <div className="border-b border-slate-800 p-5">
           <h2 className="font-semibold">Atividade recente</h2>
+          <p className="mt-1 text-sm text-slate-500">Visitantes ativos nos últimos 15 minutos</p>
         </div>
         <div className="divide-y divide-slate-800">
           {active.slice(0, 50).map((event) => (
@@ -642,6 +643,41 @@ function LiveView({ events, onRefresh }: { events: FunnelEvent[]; onRefresh: () 
           ))}
           {!active.length && (
             <p className="px-5 py-12 text-center text-slate-500">Nenhum evento recente ainda.</p>
+          )}
+        </div>
+      </section>
+      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+        <div className="border-b border-slate-800 p-5">
+          <h2 className="font-semibold">Histórico do funil</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Últimos {events.length} eventos salvos, incluindo visitantes que já saíram
+          </p>
+        </div>
+        <div className="divide-y divide-slate-800">
+          {events.slice(0, 150).map((event) => (
+            <div
+              key={`history-${event.id}`}
+              className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-sm"
+            >
+              <div>
+                <p className="text-slate-200">{labels[event.event_name] || event.event_name}</p>
+                {Object.keys(event.metadata ?? {}).length > 0 && (
+                  <p className="mt-1 max-w-xl truncate text-xs text-slate-500">
+                    {Object.entries(event.metadata)
+                      .slice(0, 3)
+                      .map(([key, value]) => `${key}: ${String(value)}`)
+                      .join(" · ")}
+                  </p>
+                )}
+              </div>
+              <span className="font-mono text-xs text-slate-500">
+                {event.session_id.slice(0, 8)} ·{" "}
+                {new Date(event.created_at).toLocaleString("pt-BR")}
+              </span>
+            </div>
+          ))}
+          {!events.length && (
+            <p className="px-5 py-12 text-center text-slate-500">Nenhum evento histórico ainda.</p>
           )}
         </div>
       </section>
