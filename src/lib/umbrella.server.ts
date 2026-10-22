@@ -10,7 +10,7 @@ const KEY = "umbrella_api_key";
 const CACHE_MS = 60_000;
 let cache: { value: string | null; at: number } | null = null;
 
-async function db() {
+async function db(): Promise<any> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return supabaseAdmin;
 }
