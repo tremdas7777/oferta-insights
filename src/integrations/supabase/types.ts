@@ -94,24 +94,33 @@ export type Database = {
           amount: number
           api_key: string | null
           id: boolean
+          notification_webhook_url: string | null
           postback_url: string | null
+          product_name: string
           updated_at: string
+          utmfy_api_token: string | null
           webhook_secret: string | null
         }
         Insert: {
           amount?: number
           api_key?: string | null
           id?: boolean
+          notification_webhook_url?: string | null
           postback_url?: string | null
+          product_name?: string
           updated_at?: string
+          utmfy_api_token?: string | null
           webhook_secret?: string | null
         }
         Update: {
           amount?: number
           api_key?: string | null
           id?: boolean
+          notification_webhook_url?: string | null
           postback_url?: string | null
+          product_name?: string
           updated_at?: string
+          utmfy_api_token?: string | null
           webhook_secret?: string | null
         }
         Relationships: []
