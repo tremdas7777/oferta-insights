@@ -71,6 +71,7 @@ function AdminPage() {
     apiKey: "",
     webhookSecret: "",
     utmfyApiToken: "",
+    umbrellaApiKey: "",
     amount: "137",
     notificationWebhookUrl: "",
     productName: "Ebook Amoroso",
@@ -80,6 +81,8 @@ function AdminPage() {
     configured: false,
     webhookConfigured: false,
     apiKeyLast4: "",
+    umbrellaConfigured: false,
+    umbrellaKeyLast4: "",
   });
   const [saved, setSaved] = useState("");
   const [testingNotification, setTestingNotification] = useState(false);
@@ -381,6 +384,7 @@ function AdminPage() {
                   apiKey: "",
                   webhookSecret: "",
                   utmfyApiToken: "",
+                  umbrellaApiKey: "",
                 }));
                 await loadSettings();
               } catch (cause) {
@@ -962,6 +966,7 @@ function Settings({
     apiKey: string;
     webhookSecret: string;
     utmfyApiToken: string;
+    umbrellaApiKey: string;
     amount: string;
     notificationWebhookUrl: string;
     productName: string;
@@ -970,6 +975,7 @@ function Settings({
     apiKey: string;
     webhookSecret: string;
     utmfyApiToken: string;
+    umbrellaApiKey: string;
     amount: string;
     notificationWebhookUrl: string;
     productName: string;
@@ -980,6 +986,8 @@ function Settings({
     apiKeyLast4: string;
     utmfyConfigured?: boolean;
     utmfyTokenLast4?: string;
+    umbrellaConfigured?: boolean;
+    umbrellaKeyLast4?: string;
   };
   webhookEndpoint: string;
   saved: string;
@@ -1029,6 +1037,21 @@ function Settings({
             value={settings.utmfyApiToken}
             onChange={(value) => setSettings({ ...settings, utmfyApiToken: value })}
           />
+          <Field
+            label="Chave API UmbrellaPag"
+            type="password"
+            placeholder={
+              meta.umbrellaKeyLast4
+                ? `Salva · termina em ${meta.umbrellaKeyLast4}`
+                : "Cole aqui sua UMBRELLA_API_KEY"
+            }
+            value={settings.umbrellaApiKey}
+            onChange={(value) => setSettings({ ...settings, umbrellaApiKey: value })}
+          />
+          <p className="-mt-2 text-xs leading-5 text-slate-500">
+            A UmbrellaPag será usada para gerar e consultar os PIX deste checkout. A chave fica
+            apenas no backend.
+          </p>
           <p className="-mt-2 text-xs leading-5 text-slate-500">
             Crie a credencial em UTMfy → Integrações → Webhooks → Credenciais de API. O token fica
             salvo apenas no backend.
@@ -1105,10 +1128,14 @@ function Settings({
             {meta.utmfyConfigured ? "✓" : "○"} Integração UTMfy configurada
             {meta.utmfyTokenLast4 ? ` · termina em ${meta.utmfyTokenLast4}` : ""}
           </li>
+          <li>
+            {meta.umbrellaConfigured ? "✓" : "○"} Integração UmbrellaPag configurada
+            {meta.umbrellaKeyLast4 ? ` · termina em ${meta.umbrellaKeyLast4}` : ""}
+          </li>
           <li>✓ Eventos enviados: venda pendente e venda paga</li>
         </ul>
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4 text-xs leading-5 text-slate-500">
-          Endpoint: <code className="text-slate-300">/api/sagacepay/webhook</code>
+          Endpoint: <code className="text-slate-300">/api/public/umbrella-webhook</code>
           <br />
           Eventos de gateway: <code className="text-slate-300">sale.paid</code>,{" "}
           <code className="text-slate-300">sale.failed</code>,{" "}

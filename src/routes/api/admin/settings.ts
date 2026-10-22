@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { isAdminRequest } from "@/lib/admin-auth.server";
 import { readSagacePaySettings, saveSagacePaySettings } from "@/lib/admin-data.server";
 import { notifySaleEvent, webhookUrl } from "@/lib/sagacepay.server";
+import { getUmbrellaKeySource, saveUmbrellaKey } from "@/lib/umbrella.server";
 
 function unauthorized() {
   return Response.json({ error: "Não autorizado." }, { status: 401 });
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/api/admin/settings")({
         if (!(await isAdminRequest(request))) return unauthorized();
         const settings = await readSagacePaySettings();
         const apiKey = settings?.api_key?.trim() ?? "";
+        const umbrella = await getUmbrellaKeySource();
         const utmfyApiToken =
           settings?.utmfy_api_token?.trim() || process.env["UTMFY_API_TOKEN"]?.trim() || "";
         return Response.json({
@@ -26,6 +28,9 @@ export const Route = createFileRoute("/api/admin/settings")({
           ),
           utmfyConfigured: Boolean(utmfyApiToken),
           utmfyTokenLast4: utmfyApiToken.slice(-4),
+          umbrellaConfigured: Boolean(umbrella.key),
+          umbrellaKeyLast4: umbrella.key?.slice(-4) ?? "",
+          umbrellaKeySource: umbrella.source,
           postbackUrl: webhookUrl(request),
           amount: Number(settings?.amount ?? 137),
           notificationWebhookUrl: settings?.notification_webhook_url ?? "",
@@ -36,6 +41,7 @@ export const Route = createFileRoute("/api/admin/settings")({
         if (!(await isAdminRequest(request))) return unauthorized();
         const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
         const current = (await readSagacePaySettings()) ?? {};
+        const currentUmbrella = await getUmbrellaKeySource();
         if (body["testNotification"] === true) {
           const notificationEndpoint =
             current.notification_webhook_url?.trim() ||
@@ -76,6 +82,10 @@ export const Route = createFileRoute("/api/admin/settings")({
           typeof body["utmfyApiToken"] === "string" && body["utmfyApiToken"].trim()
             ? body["utmfyApiToken"].trim()
             : current.utmfy_api_token?.trim() || process.env["UTMFY_API_TOKEN"]?.trim() || "";
+        const umbrellaApiKey =
+          typeof body["umbrellaApiKey"] === "string" && body["umbrellaApiKey"].trim()
+            ? body["umbrellaApiKey"].trim()
+            : null;
         const amount = Number(body["amount"] ?? current.amount ?? 137);
         const notificationWebhookUrl =
           typeof body["notificationWebhookUrl"] === "string"
@@ -85,11 +95,21 @@ export const Route = createFileRoute("/api/admin/settings")({
           typeof body["productName"] === "string" && body["productName"].trim()
             ? body["productName"].trim().slice(0, 120)
             : current.product_name?.trim() || "Ebook Amoroso";
-        if (!apiKey || !webhookSecret || !Number.isFinite(amount) || amount <= 0) {
+        if (
+          (!apiKey || !webhookSecret) &&
+          !umbrellaApiKey &&
+          !currentUmbrella.key &&
+          !process.env["UMBRELLA_API_KEY"]?.trim()
+        ) {
           return Response.json(
-            { error: "Informe API key, webhook secret e um valor válido." },
+            {
+              error: "Configure a chave Umbrella ou informe API key e webhook secret da SagacePay.",
+            },
             { status: 400 },
           );
+        }
+        if (!Number.isFinite(amount) || amount <= 0) {
+          return Response.json({ error: "Informe um valor válido." }, { status: 400 });
         }
         if (notificationWebhookUrl) {
           try {
@@ -112,6 +132,7 @@ export const Route = createFileRoute("/api/admin/settings")({
             product_name: productName,
             amount,
           });
+          if (umbrellaApiKey) await saveUmbrellaKey(umbrellaApiKey);
           return Response.json({ ok: true });
         } catch (error) {
           console.error("[Admin] unable to save settings", error);

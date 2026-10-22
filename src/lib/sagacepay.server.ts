@@ -1,4 +1,5 @@
 import { readSagacePaySettings } from "@/lib/admin-data.server";
+import { createUmbrellaPix, getUmbrellaKey, getUmbrellaTransaction } from "@/lib/umbrella.server";
 
 const DEFAULT_SAGACEPAY_BASE_URL = "https://sagacepay.com/api";
 
@@ -61,8 +62,8 @@ export async function getSagacePayRuntimeConfig(): Promise<SagacePayRuntimeConfi
   const configuredAmount = Number(settings?.amount ?? SAGACEPAY_AMOUNT);
   const productName = settings?.product_name?.trim() || SAGACEPAY_PRODUCT_NAME;
 
-  if (!apiKey) {
-    throw new SagacePayConfigError("SAGACEPAY_API_KEY não está configurada no servidor.");
+  if (!apiKey && !(await getUmbrellaKey())) {
+    throw new SagacePayConfigError("UMBRELLA_API_KEY não está configurada no servidor.");
   }
 
   return {
@@ -149,6 +150,27 @@ export async function createSagacePaySale(input: CreateSaleInput): Promise<SaleR
   const config = await getSagacePayRuntimeConfig();
   const amount = input.amount ?? config.amount;
   const productName = input.productName ?? config.productName;
+  const umbrella = await createUmbrellaPix({
+    amount: Math.round(amount * 100),
+    customer: {
+      name: input.customer.name ?? "Cliente",
+      email: input.customer.email ?? "",
+      phone: input.customer.phone ?? "",
+      cpf: input.customer.document,
+    },
+    description: productName,
+    postbackUrl: input.postbackUrl ?? "",
+    metadata: { externalId: input.externalId },
+  });
+  const pixQrCode = `https://quickchart.io/qr?size=300&text=${encodeURIComponent(umbrella.qrcode)}`;
+  return {
+    id: umbrella.id,
+    status: umbrella.status,
+    amount,
+    pixCode: umbrella.qrcode,
+    pixQrCode,
+  };
+  /*
   const body: Record<string, unknown> = {
     amount,
     description: productName,
@@ -186,11 +208,17 @@ export async function createSagacePaySale(input: CreateSaleInput): Promise<SaleR
     },
     config,
   );
+*/
 }
 
 export async function getSagacePaySale(id: string): Promise<SaleResponse> {
-  const config = await getSagacePayRuntimeConfig();
-  return sagacePayRequest(`/sales/${encodeURIComponent(id)}`, { method: "GET" }, config);
+  const transaction = await getUmbrellaTransaction(id);
+  if (!transaction) throw new SagacePayApiError("Cobrança não encontrada.", 404);
+  return {
+    id,
+    status: transaction.status,
+    amount: transaction.amount / 100,
+  };
 }
 
 export async function getWebhookSecret(): Promise<string> {
@@ -285,7 +313,7 @@ export function webhookUrl(request: Request): string {
     request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
     request.headers.get("host") ||
     "";
-  return `${proto}://${host}/api/sagacepay/webhook`;
+  return `${proto}://${host}/api/public/umbrella-webhook`;
 }
 
 export function toPublicApiError(error: unknown): { message: string; status: number } {

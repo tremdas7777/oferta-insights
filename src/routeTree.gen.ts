@@ -18,6 +18,7 @@ import { Route as ApiAdminOrdersRouteImport } from './routes/api/admin/orders'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin/settings'
 import { Route as ApiAdminTestOrderRouteImport } from './routes/api/admin/test-order'
 import { Route as ApiFunnelEventsRouteImport } from './routes/api/funnel/events'
+import { Route as ApiPublicUmbrellaWebhookRouteImport } from './routes/api/public/umbrella-webhook'
 import { Route as ApiSagacepayConfigRouteImport } from './routes/api/sagacepay/config'
 import { Route as ApiSagacepaySalesRouteImport } from './routes/api/sagacepay/sales'
 import { Route as ApiSagacepayWebhookRouteImport } from './routes/api/sagacepay/webhook'
@@ -68,6 +69,12 @@ const ApiFunnelEventsRoute = ApiFunnelEventsRouteImport.update({
   path: '/api/funnel/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicUmbrellaWebhookRoute =
+  ApiPublicUmbrellaWebhookRouteImport.update({
+    id: '/api/public/umbrella-webhook',
+    path: '/api/public/umbrella-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiSagacepayConfigRoute = ApiSagacepayConfigRouteImport.update({
   id: '/api/sagacepay/config',
   path: '/api/sagacepay/config',
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/test-order': typeof ApiAdminTestOrderRoute
   '/api/funnel/events': typeof ApiFunnelEventsRoute
+  '/api/public/umbrella-webhook': typeof ApiPublicUmbrellaWebhookRoute
   '/api/sagacepay/config': typeof ApiSagacepayConfigRoute
   '/api/sagacepay/sales': typeof ApiSagacepaySalesRouteWithChildren
   '/api/sagacepay/webhook': typeof ApiSagacepayWebhookRoute
@@ -114,6 +122,7 @@ export interface FileRoutesByTo {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/test-order': typeof ApiAdminTestOrderRoute
   '/api/funnel/events': typeof ApiFunnelEventsRoute
+  '/api/public/umbrella-webhook': typeof ApiPublicUmbrellaWebhookRoute
   '/api/sagacepay/config': typeof ApiSagacepayConfigRoute
   '/api/sagacepay/sales': typeof ApiSagacepaySalesRouteWithChildren
   '/api/sagacepay/webhook': typeof ApiSagacepayWebhookRoute
@@ -130,6 +139,7 @@ export interface FileRoutesById {
   '/api/admin/settings': typeof ApiAdminSettingsRoute
   '/api/admin/test-order': typeof ApiAdminTestOrderRoute
   '/api/funnel/events': typeof ApiFunnelEventsRoute
+  '/api/public/umbrella-webhook': typeof ApiPublicUmbrellaWebhookRoute
   '/api/sagacepay/config': typeof ApiSagacepayConfigRoute
   '/api/sagacepay/sales': typeof ApiSagacepaySalesRouteWithChildren
   '/api/sagacepay/webhook': typeof ApiSagacepayWebhookRoute
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/test-order'
     | '/api/funnel/events'
+    | '/api/public/umbrella-webhook'
     | '/api/sagacepay/config'
     | '/api/sagacepay/sales'
     | '/api/sagacepay/webhook'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/test-order'
     | '/api/funnel/events'
+    | '/api/public/umbrella-webhook'
     | '/api/sagacepay/config'
     | '/api/sagacepay/sales'
     | '/api/sagacepay/webhook'
@@ -177,6 +189,7 @@ export interface FileRouteTypes {
     | '/api/admin/settings'
     | '/api/admin/test-order'
     | '/api/funnel/events'
+    | '/api/public/umbrella-webhook'
     | '/api/sagacepay/config'
     | '/api/sagacepay/sales'
     | '/api/sagacepay/webhook'
@@ -193,6 +206,7 @@ export interface RootRouteChildren {
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
   ApiAdminTestOrderRoute: typeof ApiAdminTestOrderRoute
   ApiFunnelEventsRoute: typeof ApiFunnelEventsRoute
+  ApiPublicUmbrellaWebhookRoute: typeof ApiPublicUmbrellaWebhookRoute
   ApiSagacepayConfigRoute: typeof ApiSagacepayConfigRoute
   ApiSagacepaySalesRoute: typeof ApiSagacepaySalesRouteWithChildren
   ApiSagacepayWebhookRoute: typeof ApiSagacepayWebhookRoute
@@ -263,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiFunnelEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/umbrella-webhook': {
+      id: '/api/public/umbrella-webhook'
+      path: '/api/public/umbrella-webhook'
+      fullPath: '/api/public/umbrella-webhook'
+      preLoaderRoute: typeof ApiPublicUmbrellaWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/sagacepay/config': {
       id: '/api/sagacepay/config'
       path: '/api/sagacepay/config'
@@ -315,6 +336,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
   ApiAdminTestOrderRoute: ApiAdminTestOrderRoute,
   ApiFunnelEventsRoute: ApiFunnelEventsRoute,
+  ApiPublicUmbrellaWebhookRoute: ApiPublicUmbrellaWebhookRoute,
   ApiSagacepayConfigRoute: ApiSagacepayConfigRoute,
   ApiSagacepaySalesRoute: ApiSagacepaySalesRouteWithChildren,
   ApiSagacepayWebhookRoute: ApiSagacepayWebhookRoute,
