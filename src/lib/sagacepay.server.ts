@@ -8,7 +8,6 @@ export const SAGACEPAY_PRODUCT_NAME = "Acesso WPP — 1 ano";
 export type SagacePayRuntimeConfig = {
   apiKey: string;
   webhookSecret: string;
-  postbackUrl?: string;
   baseUrl: string;
   amount: number;
 };
@@ -46,8 +45,6 @@ export async function getSagacePayRuntimeConfig(): Promise<SagacePayRuntimeConfi
   const apiKey = settings?.api_key?.trim() || process.env["SAGACEPAY_API_KEY"] || "";
   const webhookSecret =
     settings?.webhook_secret?.trim() || process.env["SAGACEPAY_WEBHOOK_SECRET"] || "";
-  const configuredPostbackUrl =
-    settings?.postback_url?.trim() || process.env["SAGACEPAY_POSTBACK_URL"]?.trim();
   const configuredBaseUrl = process.env["SAGACEPAY_BASE_URL"] ?? DEFAULT_SAGACEPAY_BASE_URL;
   const configuredAmount = Number(settings?.amount ?? SAGACEPAY_AMOUNT);
 
@@ -58,7 +55,6 @@ export async function getSagacePayRuntimeConfig(): Promise<SagacePayRuntimeConfi
   return {
     apiKey,
     webhookSecret,
-    ...(configuredPostbackUrl ? { postbackUrl: configuredPostbackUrl } : {}),
     baseUrl: configuredBaseUrl.replace(/\/$/, ""),
     amount:
       Number.isFinite(configuredAmount) && configuredAmount > 0
@@ -174,12 +170,16 @@ export async function getWebhookSecret(): Promise<string> {
   }
 }
 
-export async function getPostbackUrl(): Promise<string | undefined> {
-  try {
-    return (await getSagacePayRuntimeConfig()).postbackUrl;
-  } catch {
-    return undefined;
-  }
+// O webhook é sempre derivado do domínio da requisição: qualquer domínio
+// conectado ao projeto funciona sem configuração extra.
+export function webhookUrl(request: Request): string {
+  const proto =
+    request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || "https";
+  const host =
+    request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
+    request.headers.get("host") ||
+    "";
+  return `${proto}://${host}/api/sagacepay/webhook`;
 }
 
 export function toPublicApiError(error: unknown): { message: string; status: number } {
