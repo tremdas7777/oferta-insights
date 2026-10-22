@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { isAdminRequest } from "@/lib/admin-auth.server";
 import { readSagacePaySettings, saveSagacePaySettings } from "@/lib/admin-data.server";
+import { webhookUrl } from "@/lib/sagacepay.server";
 
 function unauthorized() {
   return Response.json({ error: "Não autorizado." }, { status: 401 });
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/api/admin/settings")({
           webhookConfigured: Boolean(
             settings?.webhook_secret || process.env["SAGACEPAY_WEBHOOK_SECRET"],
           ),
-          postbackUrl: settings?.postback_url ?? process.env["SAGACEPAY_POSTBACK_URL"] ?? "",
+          postbackUrl: webhookUrl(request),
           amount: Number(settings?.amount ?? 137),
         });
       },
@@ -37,10 +38,6 @@ export const Route = createFileRoute("/api/admin/settings")({
           typeof body["webhookSecret"] === "string" && body["webhookSecret"].trim()
             ? body["webhookSecret"].trim()
             : current.webhook_secret;
-        const postbackUrl =
-          typeof body["postbackUrl"] === "string"
-            ? body["postbackUrl"].trim()
-            : current.postback_url;
         const amount = Number(body["amount"] ?? current.amount ?? 137);
         if (!apiKey || !webhookSecret || !Number.isFinite(amount) || amount <= 0) {
           return Response.json(
@@ -48,17 +45,11 @@ export const Route = createFileRoute("/api/admin/settings")({
             { status: 400 },
           );
         }
-        if (postbackUrl && !postbackUrl.startsWith("https://")) {
-          return Response.json(
-            { error: "A URL do webhook deve começar com https://." },
-            { status: 400 },
-          );
-        }
         try {
           await saveSagacePaySettings({
             api_key: apiKey,
             webhook_secret: webhookSecret,
-            postback_url: postbackUrl,
+            postback_url: null,
             amount,
           });
           return Response.json({ ok: true });

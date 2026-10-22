@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   createSagacePaySale,
-  getPostbackUrl,
   toPublicApiError,
+  webhookUrl,
   type CreateSaleInput,
 } from "@/lib/sagacepay.server";
 import { recordOrder } from "@/lib/admin-data.server";
@@ -77,7 +77,7 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
           const clientIpAddress = getForwardedIp(request);
           if (userAgent) tracking["clientUserAgent"] = userAgent;
           if (clientIpAddress) tracking["clientIpAddress"] = clientIpAddress;
-          const postbackUrl = await getPostbackUrl();
+          const postbackUrl = webhookUrl(request);
 
           const saleInput: CreateSaleInput = {
             customer: {
@@ -89,7 +89,7 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
             externalId,
             idempotencyKey,
             ...(Object.keys(tracking).length > 0 ? { tracking } : {}),
-            ...(postbackUrl ? { postbackUrl } : {}),
+            postbackUrl,
           };
 
           const sale = await createSagacePaySale(saleInput);
