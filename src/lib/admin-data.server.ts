@@ -26,6 +26,37 @@ function adminDb(): any {
   return supabaseAdmin as any;
 }
 
+const PRIVATE_UTMFY_KEY = "utmfy_api_token";
+
+async function readPrivateSetting(key: string): Promise<string | null> {
+  try {
+    const { data, error } = await adminDb()
+      .from("private_settings")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle();
+    if (error) throw error;
+    return typeof data?.value === "string" ? data.value : null;
+  } catch (error) {
+    console.warn(`[Admin] unable to read private setting ${key}`, error);
+    return null;
+  }
+}
+
+async function savePrivateSetting(key: string, value: string | null): Promise<void> {
+  try {
+    const client = adminDb();
+    const { error: deleteError } = await client.from("private_settings").delete().eq("key", key);
+    if (deleteError) throw deleteError;
+    if (value) {
+      const { error } = await client.from("private_settings").insert({ key, value });
+      if (error) throw error;
+    }
+  } catch (error) {
+    console.warn(`[Admin] unable to save private setting ${key}`, error);
+  }
+}
+
 export async function readSagacePaySettings(): Promise<SagacePaySettings | null> {
   try {
     const { data, error } = await adminDb()
@@ -34,7 +65,8 @@ export async function readSagacePaySettings(): Promise<SagacePaySettings | null>
       .eq("id", true)
       .maybeSingle();
     if (error) throw error;
-    return data as SagacePaySettings | null;
+    const utmfy_api_token = await readPrivateSetting(PRIVATE_UTMFY_KEY);
+    return { ...(data as SagacePaySettings | null), utmfy_api_token };
   } catch (error) {
     console.warn("[Admin] unable to read SagacePay settings", error);
     return null;
@@ -42,10 +74,12 @@ export async function readSagacePaySettings(): Promise<SagacePaySettings | null>
 }
 
 export async function saveSagacePaySettings(settings: SagacePaySettings): Promise<void> {
+  const { utmfy_api_token, ...databaseSettings } = settings;
   const { error } = await adminDb()
     .from("sagacepay_settings")
-    .upsert({ id: true, ...settings, updated_at: new Date().toISOString() });
+    .upsert({ id: true, ...databaseSettings, updated_at: new Date().toISOString() });
   if (error) throw error;
+  await savePrivateSetting(PRIVATE_UTMFY_KEY, utmfy_api_token ?? null);
 }
 
 export async function recordOrder(input: OrderInput): Promise<void> {
