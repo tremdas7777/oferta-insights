@@ -185,7 +185,11 @@ export type SaleNotificationInput = {
 
 export async function notifySaleEvent(input: SaleNotificationInput): Promise<boolean> {
   const settings = await readSagacePaySettings();
-  const endpoint = settings?.notification_webhook_url?.trim();
+  const endpoint =
+    settings?.notification_webhook_url?.trim() ||
+    process.env["SAGACEPAY_NOTIFICATION_WEBHOOK_URL"]?.trim() ||
+    process.env["PUSHCUT_NOTIFICATION_URL"]?.trim() ||
+    "";
   if (!endpoint) return false;
 
   let url: URL;
@@ -198,7 +202,10 @@ export async function notifySaleEvent(input: SaleNotificationInput): Promise<boo
   }
 
   const productName =
-    input.productName?.trim() || settings?.product_name?.trim() || SAGACEPAY_PRODUCT_NAME;
+    input.productName?.trim() ||
+    settings?.product_name?.trim() ||
+    process.env["SAGACEPAY_PRODUCT_NAME"]?.trim() ||
+    SAGACEPAY_PRODUCT_NAME;
   const payload = {
     event: input.event,
     status: input.status,

@@ -33,9 +33,15 @@ export const Route = createFileRoute("/api/admin/settings")({
         const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
         const current = (await readSagacePaySettings()) ?? {};
         if (body["testNotification"] === true) {
-          if (!current.notification_webhook_url?.trim()) {
+          const notificationEndpoint =
+            current.notification_webhook_url?.trim() ||
+            process.env["SAGACEPAY_NOTIFICATION_WEBHOOK_URL"]?.trim() ||
+            process.env["PUSHCUT_NOTIFICATION_URL"]?.trim();
+          if (!notificationEndpoint) {
             return Response.json(
-              { error: "Configure o webhook de notificações antes de testar." },
+              {
+                error: "Configure SAGACEPAY_NOTIFICATION_WEBHOOK_URL no ambiente antes de testar.",
+              },
               { status: 400 },
             );
           }
