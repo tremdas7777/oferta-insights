@@ -104,6 +104,18 @@ export async function readOrder(saleId: string) {
   return data;
 }
 
+export async function updateOrderTotal(
+  saleId: string,
+  amount: number,
+  rawData: Record<string, unknown>,
+): Promise<void> {
+  const { error } = await adminDb()
+    .from("sagacepay_orders")
+    .update({ amount, raw_data: rawData, updated_at: new Date().toISOString() })
+    .eq("sale_id", saleId);
+  if (error) throw error;
+}
+
 export type FunnelEventInput = {
   sessionId: string;
   eventName: string;

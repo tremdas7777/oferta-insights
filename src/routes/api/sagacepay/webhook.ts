@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getWebhookSecret, notifySaleEvent } from "@/lib/sagacepay.server";
-import { readOrder, recordOrder } from "@/lib/admin-data.server";
+import { readOrder, recordOrder, updateOrderTotal } from "@/lib/admin-data.server";
 import { sendUtmfyOrder, statusFromGateway } from "@/lib/utmfy.server";
 
 const REPLAY_WINDOW_SECONDS = 300;
@@ -91,6 +91,62 @@ export const Route = createFileRoute("/api/sagacepay/webhook")({
               ? payload.data.status
               : event.replace("sale.", "");
           const amount = typeof payload.data.amount === "number" ? payload.data.amount : 137;
+          const externalId =
+            typeof payload.data.externalId === "string" ? payload.data.externalId : "";
+          if (
+            externalId.startsWith("wpp-upsell-") &&
+            (event === "sale.paid" || status === "paid")
+          ) {
+            const encodedSourceId = externalId.slice("wpp-upsell-".length).split("-")[0] ?? "";
+            const sourceSaleId = atob(encodedSourceId);
+            const sourceOrder = sourceSaleId ? await readOrder(sourceSaleId) : null;
+            if (!sourceOrder || sourceOrder.status !== "paid") {
+              console.warn("[SagacePay] upsell received without a paid source order", sourceSaleId);
+              return Response.json({ received: true });
+            }
+            const sourceRawData =
+              sourceOrder.raw_data &&
+              typeof sourceOrder.raw_data === "object" &&
+              !Array.isArray(sourceOrder.raw_data)
+                ? (sourceOrder.raw_data as Record<string, unknown>)
+                : {};
+            if (sourceRawData.upsellApplied === true) return Response.json({ received: true });
+            const totalAmount = Number(sourceOrder.amount ?? 0) + amount;
+            const updatedRawData = {
+              ...sourceRawData,
+              upsellApplied: true,
+              upsellAmount: amount,
+              upsellSaleId: saleId,
+              upsellPaidAt: new Date().toISOString(),
+            };
+            await updateOrderTotal(sourceSaleId, totalAmount, updatedRawData);
+            const sourceCustomer = {
+              name: sourceOrder.customer_name ?? undefined,
+              email: sourceOrder.customer_email ?? undefined,
+              document: sourceOrder.customer_document ?? undefined,
+              phone: sourceOrder.customer_phone ?? undefined,
+            };
+            const sourceTracking =
+              sourceRawData.tracking &&
+              typeof sourceRawData.tracking === "object" &&
+              !Array.isArray(sourceRawData.tracking)
+                ? (sourceRawData.tracking as Record<string, string>)
+                : undefined;
+            const sourceCreatedAt =
+              typeof sourceRawData.utmfyCreatedAt === "string"
+                ? sourceRawData.utmfyCreatedAt
+                : sourceOrder.created_at;
+            await sendUtmfyOrder({
+              orderId: sourceSaleId,
+              status: "paid",
+              amount: totalAmount,
+              customer: sourceCustomer,
+              tracking: sourceTracking,
+              createdAt: sourceCreatedAt,
+              approvedDate: sourceOrder.paid_at ?? new Date().toISOString(),
+            });
+            return Response.json({ received: true });
+          }
           let previousOrder: { raw_data?: unknown; created_at?: string } | null = null;
           try {
             previousOrder = await readOrder(saleId);

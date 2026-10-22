@@ -5,8 +5,10 @@ import {
   toPublicApiError,
   webhookUrl,
   type CreateSaleInput,
+  IMMEDIATE_ACCESS_AMOUNT,
+  IMMEDIATE_ACCESS_PRODUCT_NAME,
 } from "@/lib/sagacepay.server";
-import { recordOrder } from "@/lib/admin-data.server";
+import { readOrder, recordOrder } from "@/lib/admin-data.server";
 import { sendUtmfyOrder } from "@/lib/utmfy.server";
 import {
   checkPublicRateLimit,
@@ -62,6 +64,17 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
           const contentLength = Number(request.headers.get("content-length") ?? 0);
           if (contentLength > MAX_BODY_BYTES) return jsonError("Solicitação muito grande.", 413);
           const input = (await request.json()) as Record<string, unknown>;
+          const isImmediateAccess = input["offer"] === "immediate_access";
+          if (isImmediateAccess) {
+            const sourceSaleId = optionalText(input["sourceSaleId"], 120);
+            const sourceOrder = sourceSaleId ? await readOrder(sourceSaleId) : null;
+            if (!sourceOrder || sourceOrder.status !== "paid") {
+              return jsonError(
+                "O pedido principal precisa estar confirmado antes da liberação.",
+                409,
+              );
+            }
+          }
           const customer = (input["customer"] ?? {}) as Record<string, unknown>;
           const document =
             typeof customer["document"] === "string" ? customer["document"].replace(/\D/g, "") : "";
@@ -133,42 +146,48 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
             idempotencyKey,
             ...(Object.keys(tracking).length > 0 ? { tracking } : {}),
             postbackUrl,
+            ...(isImmediateAccess
+              ? { amount: IMMEDIATE_ACCESS_AMOUNT, productName: IMMEDIATE_ACCESS_PRODUCT_NAME }
+              : {}),
           };
 
           const sale = await createSagacePaySale(saleInput);
           if (typeof sale.id === "string") {
             const createdAt = new Date().toISOString();
-            const amount = typeof sale.amount === "number" ? sale.amount : 137;
+            const amount =
+              typeof sale.amount === "number" ? sale.amount : isImmediateAccess ? 29.9 : 137;
             const status = typeof sale.status === "string" ? sale.status : "pending";
-            try {
-              await recordOrder({
+            if (!isImmediateAccess) {
+              try {
+                await recordOrder({
+                  saleId: sale.id,
+                  externalId,
+                  status,
+                  amount,
+                  customer: saleInput.customer,
+                  rawData: { ...sale, utmfyCreatedAt: createdAt, offer: "standard" },
+                  tracking,
+                });
+              } catch (storageError) {
+                console.warn("[SagacePay] unable to persist order", storageError);
+              }
+              await notifySaleEvent({
+                event: "sale.pending",
                 saleId: sale.id,
                 externalId,
-                status,
+                status: "pending",
                 amount,
                 customer: saleInput.customer,
-                rawData: { ...sale, utmfyCreatedAt: createdAt },
-                tracking,
               });
-            } catch (storageError) {
-              console.warn("[SagacePay] unable to persist order", storageError);
+              await sendUtmfyOrder({
+                orderId: sale.id,
+                status: "waiting_payment",
+                amount,
+                customer: saleInput.customer,
+                tracking,
+                createdAt,
+              });
             }
-            await notifySaleEvent({
-              event: "sale.pending",
-              saleId: sale.id,
-              externalId,
-              status: "pending",
-              amount,
-              customer: saleInput.customer,
-            });
-            await sendUtmfyOrder({
-              orderId: sale.id,
-              status: "waiting_payment",
-              amount,
-              customer: saleInput.customer,
-              tracking,
-              createdAt,
-            });
           }
           return Response.json({
             id: sale.id,

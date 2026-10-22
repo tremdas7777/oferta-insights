@@ -4,6 +4,8 @@ const DEFAULT_SAGACEPAY_BASE_URL = "https://sagacepay.com/api";
 
 export const SAGACEPAY_AMOUNT = 137;
 export const SAGACEPAY_PRODUCT_NAME = "Ebook Amoroso";
+export const IMMEDIATE_ACCESS_AMOUNT = 29.9;
+export const IMMEDIATE_ACCESS_PRODUCT_NAME = "Liberação imediata — Ebook Amoroso";
 
 export type SagacePayRuntimeConfig = {
   apiKey: string;
@@ -36,6 +38,8 @@ export type CreateSaleInput = {
   idempotencyKey: string;
   tracking?: Record<string, string>;
   postbackUrl?: string;
+  amount?: number;
+  productName?: string;
 };
 
 export type SaleResponse = {
@@ -143,9 +147,11 @@ async function sagacePayRequest(
 
 export async function createSagacePaySale(input: CreateSaleInput): Promise<SaleResponse> {
   const config = await getSagacePayRuntimeConfig();
+  const amount = input.amount ?? config.amount;
+  const productName = input.productName ?? config.productName;
   const body: Record<string, unknown> = {
-    amount: config.amount,
-    description: config.productName,
+    amount,
+    description: productName,
     expirationInSeconds: 86400,
     externalId: input.externalId,
     customer: {
@@ -156,9 +162,9 @@ export async function createSagacePaySale(input: CreateSaleInput): Promise<SaleR
     },
     items: [
       {
-        description: config.productName,
+        description: productName,
         quantity: 1,
-        unitPrice: config.amount,
+        unitPrice: amount,
         tangible: false,
       },
     ],
