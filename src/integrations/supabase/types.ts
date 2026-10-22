@@ -14,7 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      sagacepay_orders: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_document: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          external_id: string | null
+          id: string
+          paid_at: string | null
+          raw_data: Json
+          sale_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_document?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          external_id?: string | null
+          id?: string
+          paid_at?: string | null
+          raw_data?: Json
+          sale_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_document?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          external_id?: string | null
+          id?: string
+          paid_at?: string | null
+          raw_data?: Json
+          sale_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sagacepay_settings: {
+        Row: {
+          amount: number
+          api_key: string | null
+          id: boolean
+          postback_url: string | null
+          updated_at: string
+          webhook_secret: string | null
+        }
+        Insert: {
+          amount?: number
+          api_key?: string | null
+          id?: boolean
+          postback_url?: string | null
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Update: {
+          amount?: number
+          api_key?: string | null
+          id?: boolean
+          postback_url?: string | null
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
