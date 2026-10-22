@@ -70,6 +70,7 @@ function AdminPage() {
   const [settings, setSettings] = useState({
     apiKey: "",
     webhookSecret: "",
+    utmfyApiToken: "",
     amount: "137",
     notificationWebhookUrl: "",
     productName: "Ebook Amoroso",
@@ -123,6 +124,7 @@ function AdminPage() {
       setWebhookEndpoint(data.postbackUrl ?? "");
       setSettings((current) => ({
         ...current,
+        utmfyApiToken: "",
         amount: String(data.amount ?? 137),
         notificationWebhookUrl: String(data.notificationWebhookUrl ?? ""),
         productName: String(data.productName ?? "Ebook Amoroso"),
@@ -239,7 +241,7 @@ function AdminPage() {
             Pedidos
           </Tab>
           <Tab active={tab === "settings"} onClick={() => setTab("settings")}>
-            SagacePay
+            Integrações
           </Tab>
         </nav>
         {tab !== "settings" && tab !== "live" && (
@@ -356,7 +358,11 @@ function AdminPage() {
                 );
                 await loadDashboard();
               } catch (cause) {
-                setError(cause instanceof Error ? cause.message : "Não foi possível gerar o pedido de teste.");
+                setError(
+                  cause instanceof Error
+                    ? cause.message
+                    : "Não foi possível gerar o pedido de teste.",
+                );
               } finally {
                 setCreatingTestOrder(false);
               }
@@ -370,7 +376,12 @@ function AdminPage() {
                   body: JSON.stringify(settings),
                 });
                 setSaved("Configurações salvas com segurança.");
-                setSettings((current) => ({ ...current, apiKey: "", webhookSecret: "" }));
+                setSettings((current) => ({
+                  ...current,
+                  apiKey: "",
+                  webhookSecret: "",
+                  utmfyApiToken: "",
+                }));
                 await loadSettings();
               } catch (cause) {
                 setError(cause instanceof Error ? cause.message : "Não foi possível salvar.");
@@ -627,7 +638,8 @@ function LiveView({
     (event) => windowMinutes === 0 || new Date(event.created_at).getTime() >= activeSince,
   );
   const sessions = new Set(active.map((event) => event.session_id)).size;
-  const windowLabel = windowMinutes === 0 ? "todo o histórico" : `últimos ${formatWindow(windowMinutes)}`;
+  const windowLabel =
+    windowMinutes === 0 ? "todo o histórico" : `últimos ${formatWindow(windowMinutes)}`;
   const stages = Object.keys(labels).map((eventName) => ({
     eventName,
     label: labels[eventName] ?? eventName,
@@ -643,17 +655,29 @@ function LiveView({
   active.forEach((event) => {
     const metadata = event.metadata ?? {};
     const sourceValue =
-      metadata["utmSource"] ?? metadata["utm_source"] ?? metadata["source"] ??
+      metadata["utmSource"] ??
+      metadata["utm_source"] ??
+      metadata["source"] ??
       (metadata["fbclid"] ? "Meta Ads" : metadata["gclid"] ? "Google Ads" : "Direto");
-    const source = typeof sourceValue === "string" && sourceValue.trim() ? sourceValue.trim() : "Direto";
-    const row = traffic.get(source) ?? { sessions: new Set<string>(), events: 0, pix: new Set<string>() };
+    const source =
+      typeof sourceValue === "string" && sourceValue.trim() ? sourceValue.trim() : "Direto";
+    const row = traffic.get(source) ?? {
+      sessions: new Set<string>(),
+      events: 0,
+      pix: new Set<string>(),
+    };
     row.sessions.add(event.session_id);
     row.events += 1;
     if (event.event_name === "pix_generated") row.pix.add(event.session_id);
     traffic.set(source, row);
   });
   const trafficRows = Array.from(traffic.entries())
-    .map(([source, row]) => ({ source, sessions: row.sessions.size, events: row.events, pix: row.pix.size }))
+    .map(([source, row]) => ({
+      source,
+      sessions: row.sessions.size,
+      events: row.events,
+      pix: row.pix.size,
+    }))
     .sort((a, b) => b.sessions - a.sessions || b.events - a.events);
   return (
     <section className="space-y-5">
@@ -712,14 +736,29 @@ function LiveView({
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Metric label="Eventos registrados" value={String(active.length)} hint={windowLabel} />
-        <Metric label="Taxa telefone" value={`${stageRate("phone_submitted").toFixed(1)}%`} hint="Das sessões do período" />
-        <Metric label="Taxa checkout" value={`${stageRate("checkout_opened").toFixed(1)}%`} hint="Das sessões do período" />
-        <Metric label="Taxa geração PIX" value={`${stageRate("pix_generated").toFixed(1)}%`} hint="Das sessões do período" accent />
+        <Metric
+          label="Taxa telefone"
+          value={`${stageRate("phone_submitted").toFixed(1)}%`}
+          hint="Das sessões do período"
+        />
+        <Metric
+          label="Taxa checkout"
+          value={`${stageRate("checkout_opened").toFixed(1)}%`}
+          hint="Das sessões do período"
+        />
+        <Metric
+          label="Taxa geração PIX"
+          value={`${stageRate("pix_generated").toFixed(1)}%`}
+          hint="Das sessões do período"
+          accent
+        />
       </div>
       <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
         <div className="border-b border-slate-800 p-5">
           <h2 className="font-semibold">Origem do tráfego</h2>
-          <p className="mt-1 text-sm text-slate-500">Sessões e geração de PIX agrupadas por UTM ou plataforma detectada</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Sessões e geração de PIX agrupadas por UTM ou plataforma detectada
+          </p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -739,11 +778,17 @@ function LiveView({
                   <td className="px-5 py-3 text-slate-300">{row.sessions}</td>
                   <td className="px-5 py-3 text-slate-400">{row.events}</td>
                   <td className="px-5 py-3 text-emerald-300">{row.pix}</td>
-                  <td className="px-5 py-3 text-slate-400">{((row.pix / (row.sessions || 1)) * 100).toFixed(1)}%</td>
+                  <td className="px-5 py-3 text-slate-400">
+                    {((row.pix / (row.sessions || 1)) * 100).toFixed(1)}%
+                  </td>
                 </tr>
               ))}
               {!trafficRows.length && (
-                <tr><td colSpan={5} className="px-5 py-8 text-center text-slate-500">Nenhuma origem registrada no período.</td></tr>
+                <tr>
+                  <td colSpan={5} className="px-5 py-8 text-center text-slate-500">
+                    Nenhuma origem registrada no período.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -878,7 +923,9 @@ function TrafficSource({ order }: { order: Order }) {
   const source = attribution["utmSource"] || attribution["utm_source"];
   const medium = attribution["utmMedium"] || attribution["utm_medium"];
   const campaign = attribution["utmCampaign"] || attribution["utm_campaign"];
-  const parts = [source, medium, campaign].filter((value): value is string => typeof value === "string" && Boolean(value));
+  const parts = [source, medium, campaign].filter(
+    (value): value is string => typeof value === "string" && Boolean(value),
+  );
   return <span title={parts.join(" / ")}>{parts.join(" / ") || "Direto"}</span>;
 }
 function Status({ value }: { value: string }) {
@@ -914,6 +961,7 @@ function Settings({
   settings: {
     apiKey: string;
     webhookSecret: string;
+    utmfyApiToken: string;
     amount: string;
     notificationWebhookUrl: string;
     productName: string;
@@ -921,11 +969,18 @@ function Settings({
   setSettings: (value: {
     apiKey: string;
     webhookSecret: string;
+    utmfyApiToken: string;
     amount: string;
     notificationWebhookUrl: string;
     productName: string;
   }) => void;
-  meta: { configured: boolean; webhookConfigured: boolean; apiKeyLast4: string };
+  meta: {
+    configured: boolean;
+    webhookConfigured: boolean;
+    apiKeyLast4: string;
+    utmfyConfigured?: boolean;
+    utmfyTokenLast4?: string;
+  };
   webhookEndpoint: string;
   saved: string;
   testingNotification: boolean;
@@ -963,6 +1018,21 @@ function Settings({
             value={settings.webhookSecret}
             onChange={(value) => setSettings({ ...settings, webhookSecret: value })}
           />
+          <Field
+            label="Token da UTMfy"
+            type="password"
+            placeholder={
+              meta.utmfyTokenLast4
+                ? `Salvo · termina em ${meta.utmfyTokenLast4}`
+                : "Cole aqui o x-api-token da UTMfy"
+            }
+            value={settings.utmfyApiToken}
+            onChange={(value) => setSettings({ ...settings, utmfyApiToken: value })}
+          />
+          <p className="-mt-2 text-xs leading-5 text-slate-500">
+            Crie a credencial em UTMfy → Integrações → Webhooks → Credenciais de API. O token fica
+            salvo apenas no backend.
+          </p>
           <div>
             <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               URL do webhook (automática)
@@ -1031,6 +1101,10 @@ function Settings({
           <li>{meta.webhookConfigured ? "✓" : "○"} Webhook Secret configurado</li>
           <li>○ Migração Supabase aplicada</li>
           <li>{settings.notificationWebhookUrl ? "✓" : "○"} Webhook de notificações configurado</li>
+          <li>
+            {meta.utmfyConfigured ? "✓" : "○"} Integração UTMfy configurada
+            {meta.utmfyTokenLast4 ? ` · termina em ${meta.utmfyTokenLast4}` : ""}
+          </li>
           <li>✓ Eventos enviados: venda pendente e venda paga</li>
         </ul>
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4 text-xs leading-5 text-slate-500">

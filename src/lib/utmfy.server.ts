@@ -1,4 +1,6 @@
-import { SAGACEPAY_PRODUCT_NAME } from "@/lib/sagacepay.server";
+import { readSagacePaySettings } from "@/lib/admin-data.server";
+
+const SAGACEPAY_PRODUCT_NAME = "Ebook Amoroso";
 
 const UTMFY_ENDPOINT = "https://api.utmify.com.br/api-credentials/orders";
 const PLATFORM_NAME = "WPP";
@@ -56,7 +58,8 @@ export function isUtmfyConfigured(): boolean {
 }
 
 export async function sendUtmfyOrder(input: UTMfyInput): Promise<boolean> {
-  const token = process.env["UTMFY_API_TOKEN"]?.trim();
+  const settings = await readSagacePaySettings();
+  const token = settings?.utmfy_api_token?.trim() || process.env["UTMFY_API_TOKEN"]?.trim();
   if (!token) return false;
 
   const amountInCents = Math.round(input.amount * 100);
@@ -78,7 +81,10 @@ export async function sendUtmfyOrder(input: UTMfyInput): Promise<boolean> {
     products: [
       {
         id: "ebook-amoroso",
-        name: process.env["SAGACEPAY_PRODUCT_NAME"]?.trim() || SAGACEPAY_PRODUCT_NAME,
+        name:
+          settings?.product_name?.trim() ||
+          process.env["SAGACEPAY_PRODUCT_NAME"]?.trim() ||
+          SAGACEPAY_PRODUCT_NAME,
         planId: null,
         planName: null,
         quantity: 1,

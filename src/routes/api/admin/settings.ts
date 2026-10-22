@@ -14,6 +14,8 @@ export const Route = createFileRoute("/api/admin/settings")({
         if (!(await isAdminRequest(request))) return unauthorized();
         const settings = await readSagacePaySettings();
         const apiKey = settings?.api_key?.trim() ?? "";
+        const utmfyApiToken =
+          settings?.utmfy_api_token?.trim() || process.env["UTMFY_API_TOKEN"]?.trim() || "";
         return Response.json({
           configured: Boolean(apiKey || process.env["SAGACEPAY_API_KEY"]),
           apiKeyLast4: apiKey
@@ -22,6 +24,8 @@ export const Route = createFileRoute("/api/admin/settings")({
           webhookConfigured: Boolean(
             settings?.webhook_secret || process.env["SAGACEPAY_WEBHOOK_SECRET"],
           ),
+          utmfyConfigured: Boolean(utmfyApiToken),
+          utmfyTokenLast4: utmfyApiToken.slice(-4),
           postbackUrl: webhookUrl(request),
           amount: Number(settings?.amount ?? 137),
           notificationWebhookUrl: settings?.notification_webhook_url ?? "",
@@ -68,6 +72,10 @@ export const Route = createFileRoute("/api/admin/settings")({
           typeof body["webhookSecret"] === "string" && body["webhookSecret"].trim()
             ? body["webhookSecret"].trim()
             : current.webhook_secret?.trim() || process.env["SAGACEPAY_WEBHOOK_SECRET"] || "";
+        const utmfyApiToken =
+          typeof body["utmfyApiToken"] === "string" && body["utmfyApiToken"].trim()
+            ? body["utmfyApiToken"].trim()
+            : current.utmfy_api_token?.trim() || process.env["UTMFY_API_TOKEN"]?.trim() || "";
         const amount = Number(body["amount"] ?? current.amount ?? 137);
         const notificationWebhookUrl =
           typeof body["notificationWebhookUrl"] === "string"
@@ -98,6 +106,7 @@ export const Route = createFileRoute("/api/admin/settings")({
           await saveSagacePaySettings({
             api_key: apiKey,
             webhook_secret: webhookSecret,
+            utmfy_api_token: utmfyApiToken || null,
             postback_url: null,
             notification_webhook_url: notificationWebhookUrl || null,
             product_name: productName,

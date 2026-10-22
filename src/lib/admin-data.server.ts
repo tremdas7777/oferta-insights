@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 export type SagacePaySettings = {
   api_key?: string | null | undefined;
   webhook_secret?: string | null | undefined;
+  utmfy_api_token?: string | null | undefined;
   postback_url?: string | null | undefined;
   notification_webhook_url?: string | null | undefined;
   product_name?: string | null | undefined;
