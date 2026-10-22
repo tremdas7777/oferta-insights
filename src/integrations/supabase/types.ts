@@ -93,6 +93,7 @@ export type Database = {
         Row: {
           amount: number
           api_key: string | null
+          gateway_provider: string | null
           id: boolean
           notification_webhook_url: string | null
           postback_url: string | null
@@ -104,6 +105,7 @@ export type Database = {
         Insert: {
           amount?: number
           api_key?: string | null
+          gateway_provider?: string | null
           id?: boolean
           notification_webhook_url?: string | null
           postback_url?: string | null
@@ -115,6 +117,7 @@ export type Database = {
         Update: {
           amount?: number
           api_key?: string | null
+          gateway_provider?: string | null
           id?: boolean
           notification_webhook_url?: string | null
           postback_url?: string | null

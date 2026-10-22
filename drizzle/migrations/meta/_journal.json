@@ -29,6 +29,13 @@
       "when": 1792699912509,
       "tag": "0003_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792700653243,
+      "tag": "0004_add_gateway_provider",
+      "breakpoints": true
     }
   ]
 }
