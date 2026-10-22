@@ -1052,10 +1052,6 @@ body::before {
     const COUNTRY = { dial: '+55', iso: 'BR', flag: '🇧🇷', minLen: 10, maxLen: 11, label: 'Brasil' };
 
     const countrySelect = document.getElementById('countrySelect');
-    const brOption = document.createElement('option');
-    brOption.value = 'BR';
-    brOption.textContent = COUNTRY.flag + ' ' + COUNTRY.dial + '  ' + COUNTRY.label;
-    countrySelect.appendChild(brOption);
     countrySelect.value = 'BR';
     lsSet('wa_geo_iso', 'BR');
 
