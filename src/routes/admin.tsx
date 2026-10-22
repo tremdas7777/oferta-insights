@@ -276,6 +276,7 @@ function AdminPage() {
             settings={settings}
             setSettings={setSettings}
             meta={settingsMeta}
+            webhookEndpoint={webhookEndpoint}
             saved={saved}
             onSave={async () => {
               setSaved("");
@@ -589,17 +590,18 @@ function Settings({
   settings,
   setSettings,
   meta,
+  webhookEndpoint,
   saved,
   onSave,
 }: {
-  settings: { apiKey: string; webhookSecret: string; postbackUrl: string; amount: string };
+  settings: { apiKey: string; webhookSecret: string; amount: string };
   setSettings: (value: {
     apiKey: string;
     webhookSecret: string;
-    postbackUrl: string;
     amount: string;
   }) => void;
   meta: { configured: boolean; webhookConfigured: boolean; apiKeyLast4: string };
+  webhookEndpoint: string;
   saved: string;
   onSave: () => void;
 }) {
@@ -630,12 +632,18 @@ function Settings({
             value={settings.webhookSecret}
             onChange={(value) => setSettings({ ...settings, webhookSecret: value })}
           />
-          <Field
-            label="URL HTTPS do webhook"
-            placeholder="https://seu-dominio.com/api/sagacepay/webhook"
-            value={settings.postbackUrl}
-            onChange={(value) => setSettings({ ...settings, postbackUrl: value })}
-          />
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              URL do webhook (automática)
+            </label>
+            <div className="mt-1 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm text-slate-300 break-all">
+              {webhookEndpoint || "…"}
+            </div>
+            <p className="mt-1.5 text-xs leading-5 text-slate-500">
+              Gerada a partir do domínio que estiver no ar — funciona com qualquer domínio
+              conectado, sem precisar configurar nada.
+            </p>
+          </div>
           <Field
             label="Ticket (R$)"
             type="number"
