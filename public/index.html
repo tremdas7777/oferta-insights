@@ -797,15 +797,17 @@ body::before {
 
     <div class="field-label">Número de WhatsApp</div>
     <div class="phone-row">
-      <select id="countrySelect" class="country-select" aria-label="País"></select>
+      <select id="countrySelect" class="country-select" aria-label="País">
+        <option value="BR" selected>🇧🇷 +55  Brasil</option>
+      </select>
       <input
         type="text"
         id="zrAlvo"
         name="zr-alvo"
         class="phone-number-input"
-        placeholder="8888 8888"
+        placeholder="(11) 91234-5678"
         inputmode="numeric"
-        maxlength="12"
+        maxlength="16"
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
@@ -1129,10 +1131,7 @@ body::before {
     const spyBtn = document.getElementById('spyBtn');
     const phoneInput = document.getElementById('zrAlvo');
     const phoneError = document.getElementById('phoneError');
-    countrySelect.addEventListener('change', function () {
-        setCountry(countrySelect.value, { clearPhone: true, manual: true });
-    });
-    detectCountryByIp();
+    captureGeo();
     const loadingBar = document.getElementById('loadingBar');
     const loadingLabel = document.getElementById('loadingLabel');
     const loadingFill = document.getElementById('loadingFill');
@@ -1152,10 +1151,15 @@ body::before {
     phoneInput.addEventListener('input', function() {
         let v = this.value.replace(/\D/g, '');
         if (v.length > COUNTRY.maxLen) v = v.slice(0, COUNTRY.maxLen);
-        if (v.length > 4) {
-            this.value = v.slice(0, 4) + ' ' + v.slice(4);
+        if (v.length > 2) {
+            let rest = v.slice(2);
+            if (rest.length > 5) rest = rest.slice(0, 5) + '-' + rest.slice(5);
+            else if (rest.length > 4 && v.length <= 10) rest = rest.slice(0, 4) + '-' + rest.slice(4);
+            this.value = '(' + v.slice(0, 2) + ') ' + rest;
+        } else if (v.length > 0) {
+            this.value = '(' + v;
         } else {
-            this.value = v;
+            this.value = '';
         }
     });
 
@@ -1174,8 +1178,12 @@ body::before {
 
     function validatePhone() {
         const raw = phoneInput.value.replace(/\D/g, '');
-        if (raw.length < COUNTRY.minLen || raw.length > COUNTRY.maxLen) {
-            document.getElementById('phoneErrorText').textContent = 'Ingresa un número válido';
+        const ddd = parseInt(raw.slice(0, 2), 10);
+        const lenOk = raw.length === 10 || raw.length === 11;
+        const dddOk = DDD_VALIDOS.indexOf(ddd) !== -1;
+        const celOk = raw.length !== 11 || raw.charAt(2) === '9';
+        if (!lenOk || !dddOk || !celOk) {
+            document.getElementById('phoneErrorText').textContent = 'Ingresa un número brasileño válido con DDD';
             phoneError.classList.add('show');
             return false;
         }
