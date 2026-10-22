@@ -1511,7 +1511,35 @@
         color: var(--wa-dark);
       }
     </style>
-  </head>
+
+<style id="premium-payment-style">
+/* Checkout premium: mesma identidade ZapRadar, com foco em confiança e clareza. */
+.pix-modal{background:rgba(15,23,42,.78);backdrop-filter:blur(9px);padding:16px}
+.pix-dialog{width:min(100%,460px);max-height:94vh;background:linear-gradient(180deg,#fff 0%,#fbfefd 100%);border:1px solid rgba(255,255,255,.7);border-radius:28px;padding:26px 20px 20px;box-shadow:0 30px 90px rgba(0,0,0,.34)}
+.pix-dialog:before{content:"ZapRadar  ·  PAGAMENTO SEGURO";display:block;width:max-content;max-width:100%;margin:0 auto 14px;padding:6px 11px;border-radius:999px;background:#effcf4;border:1px solid #bdeed0;color:#08745d;font-size:9px;font-weight:900;letter-spacing:.1em}
+.pix-dialog h3{font-size:25px;letter-spacing:-.04em;color:#141426;text-align:center;margin:0 0 7px}
+.pix-dialog-intro{text-align:center;color:#718096;max-width:330px;margin:0 auto 20px}
+.pix-field span{font-size:11px;letter-spacing:.02em;color:#28323a}
+.pix-field input{border:1px solid #dbe5e1;border-radius:13px;background:#fff;box-shadow:0 2px 8px rgba(20,60,40,.04);padding:13px 14px}
+.pix-submit,.checkout-btn{border-radius:14px;background:linear-gradient(105deg,#08745d,#20c96b);box-shadow:0 8px 20px rgba(32,201,107,.25);letter-spacing:.06em}
+.pix-payment h4{font-size:25px;letter-spacing:-.04em;color:#141426;margin:0 0 8px}
+.pix-status{max-width:310px;margin:0 auto 15px}
+.pix-qr{width:218px;height:218px;border:8px solid #fff;border-radius:16px;box-shadow:0 6px 24px rgba(8,116,93,.14);background:#fff}
+.pix-code{border:1px dashed #8ee0ad;border-radius:12px;background:#fff;padding:12px;color:#17654f}
+.pix-copy{border:0;background:#effcf4;color:#08745d;border:1px solid #8ee0ad;border-radius:12px;padding:12px}
+.pix-paid{border:1px solid #bdeed0;background:#effcf4;color:#08745d;border-radius:14px;padding:15px}
+.pix-upsell{margin-top:18px;padding:18px;border:1px solid #bdeed0;border-radius:20px;background:linear-gradient(145deg,#f5fff8,#e9faef);text-align:center;box-shadow:0 8px 22px rgba(8,116,93,.07)}
+.pix-upsell h5{font-size:18px;color:#14532d;margin:0 0 8px;letter-spacing:-.02em}
+.pix-upsell p{color:#28745e;font-size:13px}
+.pix-upsell-price{font-size:25px;color:#075e54;letter-spacing:-.03em}
+.pix-upsell-btn{border:0;border-radius:13px;background:linear-gradient(105deg,#08745d,#20c96b);box-shadow:0 7px 17px rgba(32,201,107,.24);padding:13px}
+.pix-upsell-result{border-top:1px solid #bdeed0}
+.pix-upsell-qr{border:8px solid #fff;border-radius:13px;box-shadow:0 5px 18px rgba(8,116,93,.12)}
+.pix-upsell-code{border:1px dashed #8ee0ad;border-radius:11px;color:#17654f;background:#fff}
+.pix-upsell-copy{border:1px solid #8ee0ad;background:#fff;color:#08745d;border-radius:11px}
+.pix-back{color:#718096}
+</style>
+</head>
   <body>
     <div id="urgency-header">
       <div class="urgency-top">
@@ -3003,7 +3031,7 @@
           <div id="pix-paid-message" hidden></div>
           <div id="pix-upsell" class="pix-upsell" hidden>
             <h5>Pedido concluído com sucesso</h5>
-            <p>Em até 24 horas, você receberá sua consulta no e-mail informado.</p>
+            <p>O prazo normal para recebimento é de até 24 horas. Pagando a liberação imediata, o envio é feito imediatamente.</p>
             <p>
               <strong>Quer receber a liberação imediatamente?</strong><br />Ative agora por apenas
               <span class="pix-upsell-price">R$ 29,90</span>.
@@ -3677,7 +3705,7 @@
             codeField.hidden = true;
             copyButton.hidden = true;
             paidMessage.textContent =
-              "Pedido concluído com sucesso. Em até 24 horas, você receberá sua consulta no e-mail informado.";
+              "Pedido concluído com sucesso. O prazo normal para recebimento é de até 24 horas. Com a liberação imediata paga, o envio é feito imediatamente.";
             paidMessage.className = "pix-paid";
             paidMessage.hidden = false;
             upsell.hidden = false;
@@ -3782,7 +3810,7 @@
                 upsellButton.textContent = "LIBERAÇÃO CONFIRMADA";
                 upsellButton.disabled = true;
                 paidMessage.textContent =
-                  "Pedido concluído com sucesso. O valor total de R$ 166,90 foi atualizado no mesmo pedido e a liberação imediata foi confirmada.";
+                  "Pedido concluído com sucesso. O valor total de R$ 166,90 foi atualizado no mesmo pedido e a liberação imediata foi confirmada. O envio será feito imediatamente.";
                 paidMessage.className = "pix-paid";
                 if (typeof window.fbq === "function") {
                   var updateKey = "meta_purchase_updated_" + saleId;
