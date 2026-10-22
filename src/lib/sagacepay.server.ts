@@ -1,4 +1,4 @@
-import { readSagacePaySettings } from "@/lib/admin-data.server";
+import { getPaymentGateway, readSagacePaySettings } from "@/lib/admin-data.server";
 import { createUmbrellaPix, getUmbrellaKey, getUmbrellaTransaction } from "@/lib/umbrella.server";
 
 const DEFAULT_SAGACEPAY_BASE_URL = "https://sagacepay.com/api";
@@ -56,11 +56,7 @@ export type SaleResponse = {
 
 export async function getSagacePayRuntimeConfig(): Promise<SagacePayRuntimeConfig> {
   const settings = await readSagacePaySettings();
-  // SagacePay é o gateway padrão; UmbrellaPag só quando explicitamente selecionada.
-  const gateway =
-    settings?.gateway_provider === "umbrella" || settings?.postback_url === "gateway:umbrella"
-      ? "umbrella"
-      : "sagacepay";
+  const gateway = getPaymentGateway(settings);
   const apiKey = settings?.api_key?.trim() || process.env["SAGACEPAY_API_KEY"] || "";
   const webhookSecret =
     settings?.webhook_secret?.trim() || process.env["SAGACEPAY_WEBHOOK_SECRET"] || "";
@@ -316,14 +312,11 @@ export async function webhookUrl(request: Request): Promise<string> {
     request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
     request.headers.get("host") ||
     "";
-  // A SagacePay rejeita postbackUrl em http:// ou host local (dev): nesse caso
+  // A SagacePay rejeita postback em http:// ou host local (dev): nesse caso
   // omitimos o postback — em produção (https + domínio real) ele sempre é enviado.
   if (proto !== "https" || /^(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/.test(host)) return "";
   const settings = await readSagacePaySettings();
-  const gateway =
-    settings?.gateway_provider === "umbrella" || settings?.postback_url === "gateway:umbrella"
-      ? "umbrella"
-      : "sagacepay";
+  const gateway = getPaymentGateway(settings);
   return gateway === "sagacepay"
     ? `${proto}://${host}/api/sagacepay/webhook`
     : `${proto}://${host}/api/public/umbrella-webhook`;
