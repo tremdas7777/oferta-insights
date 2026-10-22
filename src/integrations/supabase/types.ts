@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      funnel_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          metadata: Json
+          path: string | null
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          metadata?: Json
+          path?: string | null
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          metadata?: Json
+          path?: string | null
+          session_id?: string
+        }
+        Relationships: []
+      }
       sagacepay_orders: {
         Row: {
           amount: number
@@ -69,8 +96,9 @@ export type Database = {
           id: boolean
           notification_webhook_url: string | null
           postback_url: string | null
-          product_name: string | null
+          product_name: string
           updated_at: string
+          utmfy_api_token: string | null
           webhook_secret: string | null
         }
         Insert: {
@@ -79,8 +107,9 @@ export type Database = {
           id?: boolean
           notification_webhook_url?: string | null
           postback_url?: string | null
-          product_name?: string | null
+          product_name?: string
           updated_at?: string
+          utmfy_api_token?: string | null
           webhook_secret?: string | null
         }
         Update: {
@@ -89,8 +118,9 @@ export type Database = {
           id?: boolean
           notification_webhook_url?: string | null
           postback_url?: string | null
-          product_name?: string | null
+          product_name?: string
           updated_at?: string
+          utmfy_api_token?: string | null
           webhook_secret?: string | null
         }
         Relationships: []

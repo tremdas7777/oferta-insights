@@ -11,7 +11,7 @@ const CACHE_MS = 60_000;
 let cache: { value: string | null; at: number } | null = null;
 
 async function db(): Promise<any> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { supabaseAdmin } = await import("@/lib/supabase-admin.server");
   return supabaseAdmin;
 }
 
