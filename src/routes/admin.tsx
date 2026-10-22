@@ -26,6 +26,15 @@ type Order = {
   paid_at: string | null;
 };
 
+type FunnelEvent = {
+  id: string;
+  session_id: string;
+  event_name: string;
+  path: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
 const emptyMetrics: Metrics = {
   totalOrders: 0,
   paidOrders: 0,
@@ -46,12 +55,13 @@ function AdminPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<"dashboard" | "orders" | "settings">("dashboard");
+  const [tab, setTab] = useState<"dashboard" | "live" | "orders" | "settings">("dashboard");
   const [from, setFrom] = useState(dateInput(new Date(Date.now() - 29 * 86400000)));
   const [to, setTo] = useState(dateInput(new Date()));
   const [status, setStatus] = useState("all");
   const [metrics, setMetrics] = useState<Metrics>(emptyMetrics);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [funnelEvents, setFunnelEvents] = useState<FunnelEvent[]>([]);
   const [chart, setChart] = useState<
     { date: string; paid: number; orders: number; revenue: number }[]
   >([]);
@@ -118,6 +128,15 @@ function AdminPage() {
     }
   };
 
+  const loadFunnelEvents = async () => {
+    try {
+      const data = await request("/api/admin/funnel-events");
+      setFunnelEvents(data.events ?? []);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Erro ao carregar o Live View.");
+    }
+  };
+
   useEffect(() => {
     fetch("/api/admin/auth", { credentials: "include" })
       .then((response) => response.json())
@@ -134,6 +153,13 @@ function AdminPage() {
       void loadSettings();
     }
   }, [authenticated, from, to, status]);
+
+  useEffect(() => {
+    if (!authenticated || tab !== "live") return;
+    void loadFunnelEvents();
+    const timer = window.setInterval(() => void loadFunnelEvents(), 5000);
+    return () => window.clearInterval(timer);
+  }, [authenticated, tab]);
 
   const maxRevenue = useMemo(() => Math.max(...chart.map((item) => item.revenue), 1), [chart]);
 
@@ -202,6 +228,9 @@ function AdminPage() {
           <Tab active={tab === "dashboard"} onClick={() => setTab("dashboard")}>
             Visão geral
           </Tab>
+          <Tab active={tab === "live"} onClick={() => setTab("live")}>
+            Live View
+          </Tab>
           <Tab active={tab === "orders"} onClick={() => setTab("orders")}>
             Pedidos
           </Tab>
@@ -209,7 +238,7 @@ function AdminPage() {
             SagacePay
           </Tab>
         </nav>
-        {tab !== "settings" && (
+        {tab !== "settings" && tab !== "live" && (
           <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-800 bg-slate-900 p-4">
             <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               De
@@ -275,6 +304,9 @@ function AdminPage() {
         )}
         {tab === "dashboard" && (
           <Dashboard metrics={metrics} chart={chart} maxRevenue={maxRevenue} />
+        )}
+        {tab === "live" && (
+          <LiveView events={funnelEvents} onRefresh={() => void loadFunnelEvents()} />
         )}
         {tab === "orders" && <Orders orders={orders} />}
         {tab === "settings" && (
@@ -544,6 +576,79 @@ function Funnel({
     </div>
   );
 }
+function LiveView({ events, onRefresh }: { events: FunnelEvent[]; onRefresh: () => void }) {
+  const labels: Record<string, string> = {
+    page_view: "Visitou a oferta",
+    phone_submitted: "Informou o telefone",
+    analysis_started: "Iniciou a análise",
+    checkout_opened: "Abriu o checkout",
+    pix_submitted: "Enviou os dados do PIX",
+    pix_generated: "Gerou o PIX",
+  };
+  const activeSince = Date.now() - 15 * 60 * 1000;
+  const active = events.filter((event) => new Date(event.created_at).getTime() >= activeSince);
+  const sessions = new Set(active.map((event) => event.session_id)).size;
+  const stages = Object.keys(labels).map((eventName) => ({
+    eventName,
+    label: labels[eventName],
+    count: active.filter((event) => event.event_name === eventName).length,
+  }));
+  return (
+    <section className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900 p-5">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
+            <h2 className="font-semibold">Live View do funil</h2>
+          </div>
+          <p className="mt-1 text-sm text-slate-500">
+            Eventos reais dos últimos 15 minutos · atualização a cada 5 segundos
+          </p>
+        </div>
+        <button
+          onClick={onRefresh}
+          className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
+        >
+          Atualizar agora
+        </button>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Metric
+          label="Sessões ativas"
+          value={String(sessions)}
+          hint="Com evento nos últimos 15 minutos"
+          accent
+        />
+        {stages.map((stage) => (
+          <Metric key={stage.eventName} label={stage.label} value={String(stage.count)} />
+        ))}
+      </div>
+      <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+        <div className="border-b border-slate-800 p-5">
+          <h2 className="font-semibold">Atividade recente</h2>
+        </div>
+        <div className="divide-y divide-slate-800">
+          {active.slice(0, 50).map((event) => (
+            <div
+              key={event.id}
+              className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-sm"
+            >
+              <span className="text-slate-200">{labels[event.event_name] || event.event_name}</span>
+              <span className="font-mono text-xs text-slate-500">
+                {event.session_id.slice(0, 8)} ·{" "}
+                {new Date(event.created_at).toLocaleTimeString("pt-BR")}
+              </span>
+            </div>
+          ))}
+          {!active.length && (
+            <p className="px-5 py-12 text-center text-slate-500">Nenhum evento recente ainda.</p>
+          )}
+        </div>
+      </section>
+    </section>
+  );
+}
+
 function Orders({ orders }: { orders: Order[] }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">

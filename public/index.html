@@ -1054,6 +1054,17 @@ body::before {
     const PITCH_SEGUNDOS = TOTAL_DURATION / 1000;
     const FORCED_SRC = 'W-FRONT';
 
+    function trackFunnelEvent(eventName, metadata) {
+        let sessionId = lsGet('funnel_session_id');
+        if (!sessionId) {
+            sessionId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : String(Date.now()) + '-' + String(Math.random()).slice(2);
+            lsSet('funnel_session_id', sessionId);
+        }
+        fetch('/api/funnel/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sessionId, eventName: eventName, path: window.location.pathname, metadata: metadata || {} }), keepalive: true }).catch(function () {});
+    }
+
+    trackFunnelEvent('page_view');
+
     const stepInput = document.getElementById('step-input');
     const stepAnalysis = document.getElementById('step-analysis');
     const spyBtn = document.getElementById('spyBtn');
@@ -1164,6 +1175,8 @@ body::before {
 
         const { display, digits } = getFullPhone();
 
+        trackFunnelEvent('phone_submitted', { country: 'BR' });
+
         
         spyBtn.disabled = true;
         loadingBar.classList.add('show');
@@ -1196,6 +1209,7 @@ body::before {
 
 
         startAnalysis(display, digits);
+        trackFunnelEvent('analysis_started');
 
 
         fetchProfileInBackground(digits);

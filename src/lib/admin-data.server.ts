@@ -68,6 +68,35 @@ export async function recordOrder(input: OrderInput): Promise<void> {
   if (error) throw error;
 }
 
+export type FunnelEventInput = {
+  sessionId: string;
+  eventName: string;
+  path?: string | undefined;
+  metadata?: Record<string, unknown> | undefined;
+};
+
+export async function recordFunnelEvent(input: FunnelEventInput): Promise<void> {
+  const { error } = await adminDb()
+    .from("funnel_events")
+    .insert({
+      session_id: input.sessionId,
+      event_name: input.eventName,
+      path: input.path ?? null,
+      metadata: input.metadata ?? {},
+    });
+  if (error) throw error;
+}
+
+export async function listFunnelEvents(limit = 100) {
+  const { data, error } = await adminDb()
+    .from("funnel_events")
+    .select("id, session_id, event_name, path, metadata, created_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function listOrders(filters: {
   from?: string | undefined;
   to?: string | undefined;

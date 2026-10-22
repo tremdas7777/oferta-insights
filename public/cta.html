@@ -1960,6 +1960,16 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
     var emailInput = document.getElementById('pix-email');
     var phoneInput = document.getElementById('pix-phone');
 
+    function trackFunnelEvent(eventName, metadata) {
+        var sessionId = '';
+        try { sessionId = localStorage.getItem('funnel_session_id') || ''; } catch (e) {}
+        if (!sessionId) {
+            sessionId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : String(Date.now()) + '-' + String(Math.random()).slice(2);
+            try { localStorage.setItem('funnel_session_id', sessionId); } catch (e) {}
+        }
+        fetch('/api/funnel/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sessionId, eventName: eventName, path: window.location.pathname, metadata: metadata || {} }), keepalive: true }).catch(function () {});
+    }
+
     function setError(message) {
         formError.textContent = message;
         formError.hidden = !message;
@@ -2002,6 +2012,7 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         document.getElementById('pix-document').focus();
+        trackFunnelEvent('checkout_opened');
     }
 
     function closeModal() {
@@ -2140,6 +2151,7 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
         if (!idempotencyKey) idempotencyKey = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : String(Date.now()) + '-' + String(Math.random()).slice(2);
         submitButton.disabled = true;
         submitButton.textContent = 'GERANDO PIX...';
+        trackFunnelEvent('pix_submitted');
         var externalId = 'wpp-' + idempotencyKey;
         var payload = {
             idempotencyKey: idempotencyKey,
@@ -2161,6 +2173,7 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
             .then(function (response) { return response.json().then(function (body) { return { ok: response.ok, body: body }; }); })
             .then(function (result) {
                 if (!result.ok) throw new Error(result.body.error || 'Não foi possível gerar o PIX.');
+                trackFunnelEvent('pix_generated', { saleId: result.body.id || null });
                 showSale(result.body);
             })
             .catch(function (error) {
