@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { isAdminRequest } from "@/lib/admin-auth.server";
 import { readSagacePaySettings, saveSagacePaySettings } from "@/lib/admin-data.server";
-import { webhookUrl } from "@/lib/sagacepay.server";
+import { notifySaleEvent, webhookUrl } from "@/lib/sagacepay.server";
 
 function unauthorized() {
   return Response.json({ error: "Não autorizado." }, { status: 401 });
@@ -32,6 +32,28 @@ export const Route = createFileRoute("/api/admin/settings")({
         if (!(await isAdminRequest(request))) return unauthorized();
         const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
         const current = (await readSagacePaySettings()) ?? {};
+        if (body["testNotification"] === true) {
+          if (!current.notification_webhook_url?.trim()) {
+            return Response.json(
+              { error: "Configure o webhook de notificações antes de testar." },
+              { status: 400 },
+            );
+          }
+          const delivered = await notifySaleEvent({
+            event: "sale.test",
+            saleId: `TESTE-${Date.now()}`,
+            status: "paid",
+            amount: Number(current.amount ?? 137),
+            productName: current.product_name ?? "Ebook Amoroso",
+          });
+          if (!delivered) {
+            return Response.json(
+              { error: "O webhook de teste não respondeu com sucesso." },
+              { status: 502 },
+            );
+          }
+          return Response.json({ ok: true, test: true });
+        }
         const apiKey =
           typeof body["apiKey"] === "string" && body["apiKey"].trim()
             ? body["apiKey"].trim()

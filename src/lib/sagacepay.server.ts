@@ -174,7 +174,7 @@ export async function getWebhookSecret(): Promise<string> {
 }
 
 export type SaleNotificationInput = {
-  event: "sale.pending" | "sale.paid";
+  event: "sale.pending" | "sale.paid" | "sale.test";
   saleId: string;
   externalId?: string;
   status: "pending" | "paid";
@@ -183,10 +183,10 @@ export type SaleNotificationInput = {
   customer?: { name?: string; email?: string; document?: string; phone?: string };
 };
 
-export async function notifySaleEvent(input: SaleNotificationInput): Promise<void> {
+export async function notifySaleEvent(input: SaleNotificationInput): Promise<boolean> {
   const settings = await readSagacePaySettings();
   const endpoint = settings?.notification_webhook_url?.trim();
-  if (!endpoint) return;
+  if (!endpoint) return false;
 
   let url: URL;
   try {
@@ -194,7 +194,7 @@ export async function notifySaleEvent(input: SaleNotificationInput): Promise<voi
     if (url.protocol !== "https:") throw new Error("Webhook de notificação deve usar HTTPS.");
   } catch (error) {
     console.warn("[Notifications] invalid notification webhook URL", error);
-    return;
+    return false;
   }
 
   const productName =
@@ -202,7 +202,9 @@ export async function notifySaleEvent(input: SaleNotificationInput): Promise<voi
   const payload = {
     event: input.event,
     status: input.status,
-    statusLabel: input.status === "paid" ? "paga" : "pendente",
+    statusLabel:
+      input.event === "sale.test" ? "teste" : input.status === "paid" ? "paga" : "pendente",
+    test: input.event === "sale.test",
     saleId: input.saleId,
     externalId: input.externalId ?? null,
     amount: input.amount,
@@ -225,9 +227,14 @@ export async function notifySaleEvent(input: SaleNotificationInput): Promise<voi
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
-    if (!response.ok) console.warn(`[Notifications] webhook returned HTTP ${response.status}`);
+    if (!response.ok) {
+      console.warn(`[Notifications] webhook returned HTTP ${response.status}`);
+      return false;
+    }
+    return true;
   } catch (error) {
     console.warn("[Notifications] unable to deliver sale notification", error);
+    return false;
   } finally {
     clearTimeout(timeout);
   }

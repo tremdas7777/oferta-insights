@@ -69,6 +69,8 @@ function AdminPage() {
     apiKeyLast4: "",
   });
   const [saved, setSaved] = useState("");
+  const [testingNotification, setTestingNotification] = useState(false);
+  const [testNotificationMessage, setTestNotificationMessage] = useState("");
 
   const request = async (path: string, init?: RequestInit) => {
     const response = await fetch(path, {
@@ -282,6 +284,24 @@ function AdminPage() {
             meta={settingsMeta}
             webhookEndpoint={webhookEndpoint}
             saved={saved}
+            testingNotification={testingNotification}
+            testNotificationMessage={testNotificationMessage}
+            onTest={async () => {
+              setTestNotificationMessage("");
+              setError("");
+              setTestingNotification(true);
+              try {
+                await request("/api/admin/settings", {
+                  method: "POST",
+                  body: JSON.stringify({ testNotification: true }),
+                });
+                setTestNotificationMessage("Notificação de teste enviada.");
+              } catch (cause) {
+                setError(cause instanceof Error ? cause.message : "Não foi possível testar.");
+              } finally {
+                setTestingNotification(false);
+              }
+            }}
             onSave={async () => {
               setSaved("");
               setError("");
@@ -596,6 +616,9 @@ function Settings({
   meta,
   webhookEndpoint,
   saved,
+  testingNotification,
+  testNotificationMessage,
+  onTest,
   onSave,
 }: {
   settings: {
@@ -615,6 +638,9 @@ function Settings({
   meta: { configured: boolean; webhookConfigured: boolean; apiKeyLast4: string };
   webhookEndpoint: string;
   saved: string;
+  testingNotification: boolean;
+  testNotificationMessage: string;
+  onTest: () => void;
   onSave: () => void;
 }) {
   return (
@@ -676,12 +702,25 @@ function Settings({
           />
         </div>
         {saved && <p className="mt-4 text-sm text-emerald-300">{saved}</p>}
-        <button
-          onClick={onSave}
-          className="mt-6 rounded-xl bg-emerald-500 px-4 py-3 font-bold text-slate-950"
-        >
-          Salvar configuração
-        </button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            onClick={onSave}
+            className="rounded-xl bg-emerald-500 px-4 py-3 font-bold text-slate-950"
+          >
+            Salvar configuração
+          </button>
+          <button
+            type="button"
+            onClick={onTest}
+            disabled={testingNotification}
+            className="rounded-xl border border-amber-400/50 px-4 py-3 font-bold text-amber-200 hover:bg-amber-400/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {testingNotification ? "Enviando teste..." : "Testar notificação"}
+          </button>
+        </div>
+        {testNotificationMessage && (
+          <p className="mt-3 text-sm text-amber-200">{testNotificationMessage}</p>
+        )}
       </section>
       <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
         <h2 className="font-semibold">Checklist de ativação</h2>
