@@ -109,21 +109,23 @@ export const Route = createFileRoute("/api/sagacepay/webhook")({
           }
           if (event === "sale.paid" || status === "paid") {
             const customer = payload.data.customer;
+            const customerDetails = customer
+              ? {
+                  ...(typeof customer.name === "string" ? { name: customer.name } : {}),
+                  ...(typeof customer.email === "string" ? { email: customer.email } : {}),
+                  ...(typeof customer.document === "string" ? { document: customer.document } : {}),
+                  ...(typeof customer.phone === "string" ? { phone: customer.phone } : {}),
+                }
+              : undefined;
+            const paidExternalId =
+              typeof payload.data.externalId === "string" ? payload.data.externalId : undefined;
             await notifySaleEvent({
               event: "sale.paid",
               saleId,
-              externalId:
-                typeof payload.data.externalId === "string" ? payload.data.externalId : undefined,
               status: "paid",
               amount,
-              customer: customer
-                ? {
-                    name: typeof customer.name === "string" ? customer.name : undefined,
-                    email: typeof customer.email === "string" ? customer.email : undefined,
-                    document: typeof customer.document === "string" ? customer.document : undefined,
-                    phone: typeof customer.phone === "string" ? customer.phone : undefined,
-                  }
-                : undefined,
+              ...(customerDetails ? { customer: customerDetails } : {}),
+              ...(paidExternalId ? { externalId: paidExternalId } : {}),
             });
           }
         }

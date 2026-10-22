@@ -9,19 +9,19 @@ export const Route = createFileRoute("/api/funnel/events")({
       POST: async ({ request }) => {
         try {
           const body = (await request.json()) as Record<string, unknown>;
-          const sessionId = typeof body.sessionId === "string" ? body.sessionId.trim() : "";
-          const eventName = typeof body.eventName === "string" ? body.eventName.trim() : "";
+          const sessionId = typeof body["sessionId"] === "string" ? body["sessionId"].trim() : "";
+          const eventName = typeof body["eventName"] === "string" ? body["eventName"].trim() : "";
           if (!sessionId || sessionId.length > 100 || !EVENT_PATTERN.test(eventName)) {
             return Response.json({ error: "Evento inválido." }, { status: 400 });
           }
           const metadata =
-            body.metadata && typeof body.metadata === "object"
-              ? Object.fromEntries(Object.entries(body.metadata).slice(0, 12))
+            body["metadata"] && typeof body["metadata"] === "object"
+              ? Object.fromEntries(Object.entries(body["metadata"]).slice(0, 12))
               : {};
           await recordFunnelEvent({
             sessionId,
             eventName,
-            path: typeof body.path === "string" ? body.path.slice(0, 200) : undefined,
+            path: typeof body["path"] === "string" ? body["path"].slice(0, 200) : undefined,
             metadata,
           });
           return new Response(null, {

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/api/admin/funnel-events")({
         if (!(await isAdminRequest(request)))
           return Response.json({ error: "Não autorizado." }, { status: 401 });
         try {
-          const events = await listFunnelEvents(150);
+          const events = await listFunnelEvents(1000);
           return Response.json({ events });
         } catch (error) {
           console.error("[Admin] unable to load funnel events", error);

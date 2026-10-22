@@ -62,6 +62,7 @@ function AdminPage() {
   const [metrics, setMetrics] = useState<Metrics>(emptyMetrics);
   const [orders, setOrders] = useState<Order[]>([]);
   const [funnelEvents, setFunnelEvents] = useState<FunnelEvent[]>([]);
+  const [liveWindowMinutes, setLiveWindowMinutes] = useState(15);
   const [chart, setChart] = useState<
     { date: string; paid: number; orders: number; revenue: number }[]
   >([]);
@@ -308,7 +309,12 @@ function AdminPage() {
           <Dashboard metrics={metrics} chart={chart} maxRevenue={maxRevenue} />
         )}
         {tab === "live" && (
-          <LiveView events={funnelEvents} onRefresh={() => void loadFunnelEvents()} />
+          <LiveView
+            events={funnelEvents}
+            windowMinutes={liveWindowMinutes}
+            onWindowChange={setLiveWindowMinutes}
+            onRefresh={() => void loadFunnelEvents()}
+          />
         )}
         {tab === "orders" && <Orders orders={orders} />}
         {tab === "settings" && (
@@ -596,7 +602,17 @@ function Funnel({
     </div>
   );
 }
-function LiveView({ events, onRefresh }: { events: FunnelEvent[]; onRefresh: () => void }) {
+function LiveView({
+  events,
+  windowMinutes,
+  onWindowChange,
+  onRefresh,
+}: {
+  events: FunnelEvent[];
+  windowMinutes: number;
+  onWindowChange: (value: number) => void;
+  onRefresh: () => void;
+}) {
   const labels: Record<string, string> = {
     page_view: "Visitou a oferta",
     phone_submitted: "Informou o telefone",
@@ -605,9 +621,12 @@ function LiveView({ events, onRefresh }: { events: FunnelEvent[]; onRefresh: () 
     pix_submitted: "Enviou os dados do PIX",
     pix_generated: "Gerou o PIX",
   };
-  const activeSince = Date.now() - 15 * 60 * 1000;
-  const active = events.filter((event) => new Date(event.created_at).getTime() >= activeSince);
+  const activeSince = windowMinutes > 0 ? Date.now() - windowMinutes * 60 * 1000 : 0;
+  const active = events.filter(
+    (event) => windowMinutes === 0 || new Date(event.created_at).getTime() >= activeSince,
+  );
   const sessions = new Set(active.map((event) => event.session_id)).size;
+  const windowLabel = windowMinutes === 0 ? "todo o histórico" : `últimos ${formatWindow(windowMinutes)}`;
   const stages = Object.keys(labels).map((eventName) => ({
     eventName,
     label: labels[eventName],
@@ -622,31 +641,51 @@ function LiveView({ events, onRefresh }: { events: FunnelEvent[]; onRefresh: () 
             <h2 className="font-semibold">Live View do funil</h2>
           </div>
           <p className="mt-1 text-sm text-slate-500">
-            Eventos reais dos últimos 15 minutos · atualização a cada 5 segundos
+            Eventos reais de {windowLabel} · atualização a cada 5 segundos
           </p>
         </div>
-        <button
-          onClick={onRefresh}
-          className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
-        >
-          Atualizar agora
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Período
+            <select
+              className="ml-2 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-100"
+              value={windowMinutes}
+              onChange={(event) => onWindowChange(Number(event.target.value))}
+            >
+              <option value={5}>5 minutos</option>
+              <option value={15}>15 minutos</option>
+              <option value={30}>30 minutos</option>
+              <option value={60}>1 hora</option>
+              <option value={180}>3 horas</option>
+              <option value={360}>6 horas</option>
+              <option value={720}>12 horas</option>
+              <option value={1440}>24 horas</option>
+              <option value={0}>Todo o histórico</option>
+            </select>
+          </label>
+          <button
+            onClick={onRefresh}
+            className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
+          >
+            Atualizar agora
+          </button>
+        </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Metric
           label="Sessões ativas"
           value={String(sessions)}
-          hint="Com evento nos últimos 15 minutos"
+          hint={`Com evento em ${windowLabel}`}
           accent
         />
         {stages.map((stage) => (
-          <Metric key={stage.eventName} label={stage.label} value={String(stage.count)} />
+          <Metric key={stage.eventName} label={stage.label ?? stage.eventName} value={String(stage.count)} />
         ))}
       </div>
       <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
         <div className="border-b border-slate-800 p-5">
           <h2 className="font-semibold">Atividade recente</h2>
-          <p className="mt-1 text-sm text-slate-500">Visitantes ativos nos últimos 15 minutos</p>
+          <p className="mt-1 text-sm text-slate-500">Visitantes em {windowLabel}</p>
         </div>
         <div className="divide-y divide-slate-800">
           {active.slice(0, 50).map((event) => (
@@ -703,6 +742,12 @@ function LiveView({ events, onRefresh }: { events: FunnelEvent[]; onRefresh: () 
       </section>
     </section>
   );
+}
+
+function formatWindow(minutes: number) {
+  if (minutes < 60) return `${minutes} minutos`;
+  const hours = minutes / 60;
+  return `${hours} ${hours === 1 ? "hora" : "horas"}`;
 }
 
 function Orders({ orders }: { orders: Order[] }) {

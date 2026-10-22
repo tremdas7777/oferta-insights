@@ -2091,10 +2091,26 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
         startPolling();
     }
 
-    function showStatus(status) {
+    function trackPaidConversion(sale) {
+        if (!sale || sale.status !== 'paid' || !sale.id || typeof window.fbq !== 'function') return;
+        var storageKey = 'meta_purchase_tracked_' + sale.id;
+        try {
+            if (localStorage.getItem(storageKey)) return;
+            localStorage.setItem(storageKey, '1');
+        } catch (e) { /* Ainda permite o disparo se o armazenamento estiver bloqueado. */ }
+        var amount = Number(sale.amount);
+        window.fbq('track', 'Purchase', {
+            value: Number.isFinite(amount) ? amount : 137,
+            currency: 'BRL'
+        }, { eventID: sale.id });
+    }
+
+    function showStatus(sale) {
+        var status = sale && sale.status;
         if (status === 'paid') {
             if (pollTimer) window.clearInterval(pollTimer);
             pollTimer = null;
+            trackPaidConversion(sale);
             resultTitle.textContent = 'Pagamento confirmado';
             resultStatus.textContent = '';
             qrImage.hidden = true;
@@ -2120,7 +2136,7 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
             if (!saleId) return;
             fetch('/api/sagacepay/sales/' + encodeURIComponent(saleId), { headers: { 'Accept': 'application/json' } })
                 .then(function (response) { return response.ok ? response.json() : null; })
-                .then(function (sale) { if (sale && sale.status) showStatus(sale.status); })
+                .then(function (sale) { if (sale && sale.status) showStatus(sale); })
                 .catch(function () { /* A próxima tentativa continua o acompanhamento. */ });
         }, 5000);
     }
