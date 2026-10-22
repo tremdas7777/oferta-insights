@@ -16,6 +16,8 @@ export type SagacePayRuntimeConfig = {
 type SagacePayErrorPayload = {
   message?: unknown;
   statusCode?: unknown;
+  error?: unknown;
+  errors?: unknown;
 };
 
 export type CreateSaleInput = {
@@ -91,9 +93,11 @@ async function parseApiResponse(response: Response): Promise<SaleResponse> {
   }
 
   if (!response.ok) {
-    const message =
-      typeof payload.message === "string"
-        ? payload.message
+    const detail = payload.message ?? payload.error ?? payload.errors;
+    const message = typeof detail === "string"
+      ? detail
+      : detail
+        ? `A SagacePay recusou a solicitação: ${JSON.stringify(detail)}`
         : `A SagacePay respondeu com HTTP ${response.status}.`;
     throw new SagacePayApiError(message, response.status);
   }

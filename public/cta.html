@@ -1967,7 +1967,7 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
             sessionId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : String(Date.now()) + '-' + String(Math.random()).slice(2);
             try { localStorage.setItem('funnel_session_id', sessionId); } catch (e) {}
         }
-        fetch('/api/funnel/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sessionId, eventName: eventName, path: window.location.pathname, metadata: metadata || {} }), keepalive: true }).catch(function () {});
+        fetch('/api/funnel/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sessionId, eventName: eventName, path: window.location.pathname, metadata: Object.assign({}, getTracking(), metadata || {}) }), keepalive: true }).catch(function () {});
     }
 
     function setError(message) {
@@ -2049,7 +2049,7 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
         var queryToPayload = {
             utm_source: 'utmSource', utm_medium: 'utmMedium', utm_campaign: 'utmCampaign',
             utm_content: 'utmContent', utm_term: 'utmTerm', fbclid: 'fbclid',
-            ttclid: 'ttclid', gclid: 'gclid'
+            ttclid: 'ttclid', gclid: 'gclid', sck: 'sck', xcod: 'xcod'
         };
         Object.keys(queryToPayload).forEach(function (key) {
             var value = params.get(key);
@@ -2059,6 +2059,17 @@ src="https://www.facebook.com/tr?id=1807708860437111&ev=PageView&noscript=1"
         var fbc = getCookie('_fbc');
         if (fbp) tracking.fbp = fbp;
         if (fbc) tracking.fbc = fbc;
+        try {
+            var stored = JSON.parse(localStorage.getItem('funnel_attribution') || '{}');
+            Object.keys(stored).forEach(function (key) {
+                if (!tracking[key]) tracking[key] = stored[key];
+            });
+            var attribution = {};
+            Object.keys(tracking).forEach(function (key) {
+                if (/^(utm|fbclid|gclid|ttclid|sck|xcod)/.test(key)) attribution[key] = tracking[key];
+            });
+            if (Object.keys(attribution).length) localStorage.setItem('funnel_attribution', JSON.stringify(attribution));
+        } catch (e) {}
         return tracking;
     }
 

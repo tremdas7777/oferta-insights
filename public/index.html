@@ -1053,6 +1053,22 @@ body::before {
     const TOTAL_DURATION = 420000;
     const PITCH_SEGUNDOS = TOTAL_DURATION / 1000;
     const FORCED_SRC = 'W-FRONT';
+    const ATTRIBUTION_STORAGE_KEY = 'funnel_attribution';
+
+    function getAttribution() {
+        const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'ttclid', 'sck', 'xcod'];
+        const current = {};
+        const params = new URLSearchParams(window.location.search);
+        keys.forEach(function (key) {
+            const value = params.get(key);
+            if (value) current[key] = value.slice(0, 500);
+        });
+        if (Object.keys(current).length) {
+            lsSet(ATTRIBUTION_STORAGE_KEY, JSON.stringify(current));
+            return current;
+        }
+        try { return JSON.parse(lsGet(ATTRIBUTION_STORAGE_KEY) || '{}') || {}; } catch (e) { return {}; }
+    }
 
     function trackFunnelEvent(eventName, metadata) {
         let sessionId = lsGet('funnel_session_id');
@@ -1060,7 +1076,7 @@ body::before {
             sessionId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : String(Date.now()) + '-' + String(Math.random()).slice(2);
             lsSet('funnel_session_id', sessionId);
         }
-        fetch('/api/funnel/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sessionId, eventName: eventName, path: window.location.pathname, metadata: metadata || {} }), keepalive: true }).catch(function () {});
+        fetch('/api/funnel/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sessionId, eventName: eventName, path: window.location.pathname, metadata: Object.assign({}, getAttribution(), metadata || {}) }), keepalive: true }).catch(function () {});
     }
 
     trackFunnelEvent('page_view');

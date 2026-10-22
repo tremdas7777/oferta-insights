@@ -24,6 +24,7 @@ type Order = {
   customer_email: string | null;
   created_at: string;
   paid_at: string | null;
+  raw_data?: Record<string, unknown> | null;
 };
 
 type FunnelEvent = {
@@ -351,7 +352,7 @@ function AdminPage() {
               try {
                 const result = await request("/api/admin/test-order", { method: "POST" });
                 setTestOrderMessage(
-                  `Pedido ${result.id} criado como ${result.status}. O pedido apareceu no histórico e a notificação pendente foi enviada.`,
+                  `SagacePay respondeu e criou o pedido ${result.id} como ${result.status}. ${result.notified ? "A notificação Pushcut foi enviada." : "O pedido foi criado, mas o Pushcut ainda não está configurado."}`,
                 );
                 await loadDashboard();
               } catch (cause) {
@@ -765,6 +766,7 @@ function Orders({ orders }: { orders: Order[] }) {
               <th className="px-5 py-3">Cliente</th>
               <th className="px-5 py-3">Valor</th>
               <th className="px-5 py-3">Status</th>
+              <th className="px-5 py-3">Origem</th>
               <th className="px-5 py-3">Data</th>
             </tr>
           </thead>
@@ -782,6 +784,9 @@ function Orders({ orders }: { orders: Order[] }) {
                 <td className="px-5 py-4">
                   <Status value={order.status} />
                 </td>
+                <td className="px-5 py-4 text-xs text-slate-400">
+                  <TrafficSource order={order} />
+                </td>
                 <td className="px-5 py-4 text-xs text-slate-500">
                   {new Date(order.created_at).toLocaleString("pt-BR")}
                 </td>
@@ -789,7 +794,7 @@ function Orders({ orders }: { orders: Order[] }) {
             ))}
             {!orders.length && (
               <tr>
-                <td colSpan={5} className="px-5 py-12 text-center text-slate-500">
+                <td colSpan={6} className="px-5 py-12 text-center text-slate-500">
                   Nenhum pedido encontrado.
                 </td>
               </tr>
@@ -799,6 +804,16 @@ function Orders({ orders }: { orders: Order[] }) {
       </div>
     </section>
   );
+}
+function TrafficSource({ order }: { order: Order }) {
+  const tracking = order.raw_data?.["tracking"];
+  if (!tracking || typeof tracking !== "object") return <span>Direto</span>;
+  const attribution = tracking as Record<string, unknown>;
+  const source = attribution["utmSource"] || attribution["utm_source"];
+  const medium = attribution["utmMedium"] || attribution["utm_medium"];
+  const campaign = attribution["utmCampaign"] || attribution["utm_campaign"];
+  const parts = [source, medium, campaign].filter((value): value is string => typeof value === "string" && Boolean(value));
+  return <span title={parts.join(" / ")}>{parts.join(" / ") || "Direto"}</span>;
 }
 function Status({ value }: { value: string }) {
   const labels: Record<string, string> = {

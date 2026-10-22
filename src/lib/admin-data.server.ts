@@ -16,6 +16,7 @@ export type OrderInput = {
   amount: number;
   customer?: { name?: string; email?: string; document?: string; phone?: string } | undefined;
   rawData?: unknown;
+  tracking?: Record<string, string>;
   paidAt?: string | undefined;
 };
 
@@ -47,6 +48,22 @@ export async function saveSagacePaySettings(settings: SagacePaySettings): Promis
 
 export async function recordOrder(input: OrderInput): Promise<void> {
   const now = new Date().toISOString();
+  let previousTracking: Record<string, string> = {};
+  if (!input.tracking) {
+    const { data: existing } = await adminDb()
+      .from("sagacepay_orders")
+      .select("raw_data")
+      .eq("sale_id", input.saleId)
+      .maybeSingle();
+    const existingRaw = existing?.raw_data;
+    if (existingRaw && typeof existingRaw === "object" && !Array.isArray(existingRaw)) {
+      const stored = (existingRaw as Record<string, unknown>)["tracking"];
+      if (stored && typeof stored === "object" && !Array.isArray(stored)) {
+        previousTracking = stored as Record<string, string>;
+      }
+    }
+  }
+  const tracking = input.tracking ?? previousTracking;
   const { error } = await adminDb()
     .from("sagacepay_orders")
     .upsert(
@@ -61,7 +78,12 @@ export async function recordOrder(input: OrderInput): Promise<void> {
         customer_phone: input.customer?.phone ?? null,
         paid_at: input.paidAt ?? (input.status === "paid" ? now : null),
         updated_at: now,
-        raw_data: input.rawData ?? {},
+        raw_data: {
+          ...(input.rawData && typeof input.rawData === "object" && !Array.isArray(input.rawData)
+            ? (input.rawData as Record<string, unknown>)
+            : { gateway_response: input.rawData ?? {} }),
+          tracking,
+        },
       },
       { onConflict: "sale_id" },
     );

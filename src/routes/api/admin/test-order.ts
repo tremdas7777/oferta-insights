@@ -21,35 +21,35 @@ export const Route = createFileRoute("/api/admin/test-order")({
         if (!(await isAdminRequest(request))) return unauthorized();
 
         const now = Date.now();
-        const externalId = `TESTE-${now}`;
         const customer = {
           name: "Cliente de Teste",
           document: TEST_CPF,
-          email: "teste@oferta-insights.local",
+          email: "teste@exemplo.com",
           phone: "11999999999",
         };
 
         try {
           const sale = await createSagacePaySale({
             customer,
-            externalId,
+            externalId: `wpp-test-${now}`,
             idempotencyKey: `admin-test-${now}`,
             postbackUrl: webhookUrl(request),
-            tracking: { source: "admin_test_order" },
+            tracking: { utmSource: "admin", utmMedium: "test", utmCampaign: "admin_test_order" },
           });
-          const saleId = typeof sale.id === "string" ? sale.id : externalId;
+          const saleId = typeof sale.id === "string" ? sale.id : `teste-${now}`;
+          const externalId = `wpp-test-${now}`;
           const amount = typeof sale.amount === "number" ? sale.amount : 137;
           const status = typeof sale.status === "string" ? sale.status : "pending";
-
           await recordOrder({
             saleId,
             externalId,
             status,
             amount,
             customer,
-            rawData: { ...sale, test: true },
+            rawData: { ...sale, test: true, source: "admin_test_order" },
+            tracking: { utmSource: "admin", utmMedium: "test", utmCampaign: "admin_test_order" },
           });
-          await notifySaleEvent({
+          const notified = await notifySaleEvent({
             event: "sale.test",
             saleId,
             externalId,
@@ -63,13 +63,13 @@ export const Route = createFileRoute("/api/admin/test-order")({
             id: saleId,
             status,
             amount,
-            pixCode: sale.pixCode ?? null,
-            pixQrCode: sale.pixQrCode ?? null,
+            notified,
+            gateway: true,
           });
         } catch (error) {
           console.error("[Admin] test order failed", error);
           const publicError = toPublicApiError(error);
-          return Response.json({ error: publicError.message }, { status: publicError.status });
+          return Response.json({ error: `Teste do gateway falhou: ${publicError.message}` }, { status: publicError.status });
         }
       },
     },

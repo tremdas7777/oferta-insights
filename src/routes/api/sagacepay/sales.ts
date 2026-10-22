@@ -126,6 +126,7 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
                 amount,
                 customer: saleInput.customer,
                 rawData: sale,
+                tracking,
               });
             } catch (storageError) {
               console.warn("[SagacePay] unable to persist order", storageError);
