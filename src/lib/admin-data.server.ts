@@ -11,6 +11,20 @@ export type SagacePaySettings = {
   amount?: number | string | null | undefined;
 };
 
+export type PaymentGateway = "sagacepay" | "umbrella";
+
+/** Resolve o gateway de forma consistente com o painel e o valor predefinido do banco. */
+export function getPaymentGateway(settings: SagacePaySettings | null | undefined): PaymentGateway {
+  // Versões antigas guardavam a seleção da SagacePay em postback_url.
+  if (settings?.postback_url === "gateway:sagacepay") return "sagacepay";
+  if (settings?.postback_url === "gateway:umbrella") return "umbrella";
+  if (settings?.gateway_provider === "sagacepay" || settings?.gateway_provider === "umbrella") {
+    return settings.gateway_provider;
+  }
+  // Umbrella é o padrão do painel e da migração Supabase.
+  return "umbrella";
+}
+
 export type OrderInput = {
   saleId: string;
   externalId?: string | undefined;
