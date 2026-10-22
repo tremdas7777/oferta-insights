@@ -58,11 +58,11 @@ export async function getUmbrellaKeySource(): Promise<{
 }
 
 export async function saveUmbrellaKey(value: string): Promise<void> {
-  const { error } = await (
-    await db()
-  )
-    .from("private_settings")
-    .upsert({ key: KEY, value, updated_at: new Date().toISOString() });
+  const client = await db();
+  const { error: deleteError } = await client.from("private_settings").delete().eq("key", KEY);
+  const { error } = deleteError
+    ? { error: deleteError }
+    : await client.from("private_settings").insert({ key: KEY, value });
   if (error) {
     const { error: legacyError } = await (await db()).from("sagacepay_settings").upsert({
       id: true,
