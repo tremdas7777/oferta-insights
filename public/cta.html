@@ -1355,7 +1355,7 @@
                 <span class="price-new">R$&nbsp;137</span><span class="price-cents">,00</span>
             </div>
         </div>
-        <a id="checkout-btn" href="https://checkout.payt.com.br/b4cad736dd5c804b6749b1c8400abe20?payment=pix&src=W-FRONT" class="checkout-btn checkout-link" style="text-decoration:none;display:block;text-align:center;">
+        <a id="checkout-btn" href="#pix-checkout" class="checkout-btn checkout-link" style="text-decoration:none;display:block;text-align:center;">
             DESBLOQUEAR ACESSO AGORA
         </a>
         <p class="secure-text">Transação 100% segura e anônima</p>
@@ -1584,12 +1584,39 @@
     <div class="final-cta">
         <h2>Quer descobrir<br>a <span class="accent">verdade completa?</span></h2>
         <p>Desbloqueie agora todas as mensagens, fotos, localizações e horários reais de conexão.</p>
-        <a href="https://checkout.payt.com.br/b4cad736dd5c804b6749b1c8400abe20?payment=pix&src=W-FRONT" class="checkout-btn checkout-link" style="max-width:360px;margin:0 auto;text-decoration:none;display:block;text-align:center;">
+        <a href="#pix-checkout" class="checkout-btn checkout-link" style="max-width:360px;margin:0 auto;text-decoration:none;display:block;text-align:center;">
             QUERO SABER A VERDADE AGORA
         </a>
         <p class="secure-text" style="margin-top:14px;">100% anônimo · Sem rastros · Acesso imediato</p>
     </div>
 
+</div>
+
+<div id="pix-checkout" class="pix-modal" hidden aria-hidden="true">
+    <div class="pix-dialog" role="dialog" aria-modal="true" aria-labelledby="pix-dialog-title">
+        <button type="button" class="pix-close" id="pix-close" aria-label="Fechar">&times;</button>
+        <div id="pix-form-view">
+            <h3 id="pix-dialog-title">Pague com PIX</h3>
+            <p class="pix-dialog-intro">Informe seus dados para gerar o PIX de R$ 137,00. O CPF/CNPJ é solicitado pela instituição de pagamento.</p>
+            <form id="pix-form" novalidate>
+                <label class="pix-field"><span>Nome completo <small>(opcional)</small></span><input id="pix-name" name="name" type="text" autocomplete="name" maxlength="160"></label>
+                <label class="pix-field"><span>CPF ou CNPJ <b class="pix-required">*</b></span><input id="pix-document" name="document" type="text" inputmode="numeric" autocomplete="off" maxlength="18" required></label>
+                <label class="pix-field"><span>E-mail <small>(opcional)</small></span><input id="pix-email" name="email" type="email" autocomplete="email" maxlength="240"></label>
+                <label class="pix-field"><span>Telefone <small>(opcional)</small></span><input id="pix-phone" name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
+                <div id="pix-form-error" class="pix-error" hidden role="alert"></div>
+                <button class="checkout-btn pix-submit" type="submit">GERAR PIX DE R$ 137,00</button>
+            </form>
+        </div>
+        <div id="pix-result-view" class="pix-payment" hidden>
+            <h4 id="pix-result-title">PIX gerado</h4>
+            <p id="pix-result-status" class="pix-status">Abra o app do seu banco, escaneie o QR Code ou copie o código abaixo.</p>
+            <img id="pix-qr" class="pix-qr" alt="QR Code para pagamento PIX" hidden>
+            <textarea id="pix-code" class="pix-code" readonly aria-label="Código PIX copia e cola"></textarea>
+            <button type="button" id="pix-copy" class="pix-copy">COPIAR CÓDIGO PIX</button>
+            <div id="pix-paid-message" hidden></div>
+            <button type="button" id="pix-back" class="pix-back">VOLTAR</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -1892,5 +1919,209 @@
     })();
 </script>
 
+<script>
+(function () {
+    var modal = document.getElementById('pix-checkout');
+    var formView = document.getElementById('pix-form-view');
+    var resultView = document.getElementById('pix-result-view');
+    var form = document.getElementById('pix-form');
+    var formError = document.getElementById('pix-form-error');
+    var submitButton = form.querySelector('button[type="submit"]');
+    var resultTitle = document.getElementById('pix-result-title');
+    var resultStatus = document.getElementById('pix-result-status');
+    var qrImage = document.getElementById('pix-qr');
+    var codeField = document.getElementById('pix-code');
+    var copyButton = document.getElementById('pix-copy');
+    var paidMessage = document.getElementById('pix-paid-message');
+    var backButton = document.getElementById('pix-back');
+    var pollTimer = null;
+    var idempotencyKey = null;
+    var saleId = null;
+
+    function setError(message) {
+        formError.textContent = message;
+        formError.hidden = !message;
+    }
+
+    function openModal(event) {
+        if (event) event.preventDefault();
+        modal.hidden = false;
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('pix-document').focus();
+    }
+
+    function closeModal() {
+        if (pollTimer) window.clearInterval(pollTimer);
+        pollTimer = null;
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    function resetToForm() {
+        if (pollTimer) window.clearInterval(pollTimer);
+        pollTimer = null;
+        idempotencyKey = null;
+        saleId = null;
+        form.reset();
+        setError('');
+        paidMessage.hidden = true;
+        paidMessage.className = '';
+        resultView.hidden = true;
+        formView.hidden = false;
+        submitButton.disabled = false;
+        submitButton.textContent = 'GERAR PIX DE R$ 137,00';
+    }
+
+    function getCookie(name) {
+        var prefix = name + '=';
+        return document.cookie.split(';').map(function (item) { return item.trim(); }).filter(function (item) { return item.indexOf(prefix) === 0; }).map(function (item) { return decodeURIComponent(item.slice(prefix.length)); })[0] || '';
+    }
+
+    function getTracking() {
+        var params = new URLSearchParams(window.location.search);
+        var tracking = {};
+        var queryToPayload = {
+            utm_source: 'utmSource', utm_medium: 'utmMedium', utm_campaign: 'utmCampaign',
+            utm_content: 'utmContent', utm_term: 'utmTerm', fbclid: 'fbclid',
+            ttclid: 'ttclid', gclid: 'gclid'
+        };
+        Object.keys(queryToPayload).forEach(function (key) {
+            var value = params.get(key);
+            if (value) tracking[queryToPayload[key]] = value;
+        });
+        var fbp = getCookie('_fbp');
+        var fbc = getCookie('_fbc');
+        if (fbp) tracking.fbp = fbp;
+        if (fbc) tracking.fbc = fbc;
+        return tracking;
+    }
+
+    function showSale(sale) {
+        var code = typeof sale.pixCode === 'string' ? sale.pixCode : '';
+        var qr = typeof sale.pixQrCode === 'string' ? sale.pixQrCode : '';
+        saleId = typeof sale.id === 'string' ? sale.id : null;
+        if (!saleId || !code) {
+            formView.hidden = false;
+            resultView.hidden = true;
+            submitButton.disabled = false;
+            submitButton.textContent = 'GERAR PIX DE R$ 137,00';
+            setError('A cobrança foi criada, mas a resposta não trouxe o código PIX. Tente novamente ou fale com o suporte.');
+            return;
+        }
+        codeField.value = code;
+        if (qr) {
+            qrImage.src = qr;
+            qrImage.hidden = false;
+        } else {
+            qrImage.hidden = true;
+        }
+        resultTitle.textContent = 'PIX gerado';
+        resultStatus.textContent = 'Abra o app do seu banco, escaneie o QR Code ou copie o código abaixo. Esta tela atualiza automaticamente após a confirmação.';
+        copyButton.hidden = false;
+        codeField.hidden = false;
+        paidMessage.hidden = true;
+        formView.hidden = true;
+        resultView.hidden = false;
+        startPolling();
+    }
+
+    function showStatus(status) {
+        if (status === 'paid') {
+            if (pollTimer) window.clearInterval(pollTimer);
+            pollTimer = null;
+            resultTitle.textContent = 'Pagamento confirmado';
+            resultStatus.textContent = '';
+            qrImage.hidden = true;
+            codeField.hidden = true;
+            copyButton.hidden = true;
+            paidMessage.textContent = 'Pagamento aprovado. Seu acesso será liberado conforme a configuração do produto.';
+            paidMessage.className = 'pix-paid';
+            paidMessage.hidden = false;
+        } else if (status === 'expired' || status === 'failed' || status === 'refunded') {
+            if (pollTimer) window.clearInterval(pollTimer);
+            pollTimer = null;
+            resultTitle.textContent = 'PIX indisponível';
+            resultStatus.textContent = '';
+            paidMessage.textContent = 'Esta cobrança não está mais disponível. Volte e gere um novo PIX.';
+            paidMessage.className = 'pix-expired';
+            paidMessage.hidden = false;
+        }
+    }
+
+    function startPolling() {
+        if (pollTimer) window.clearInterval(pollTimer);
+        pollTimer = window.setInterval(function () {
+            if (!saleId) return;
+            fetch('/api/sagacepay/sales/' + encodeURIComponent(saleId), { headers: { 'Accept': 'application/json' } })
+                .then(function (response) { return response.ok ? response.json() : null; })
+                .then(function (sale) { if (sale && sale.status) showStatus(sale.status); })
+                .catch(function () { /* A próxima tentativa continua o acompanhamento. */ });
+        }, 5000);
+    }
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        setError('');
+        var documentValue = document.getElementById('pix-document').value.replace(/\D/g, '');
+        if (documentValue.length !== 11 && documentValue.length !== 14) {
+            setError('Informe um CPF com 11 dígitos ou um CNPJ com 14 dígitos.');
+            return;
+        }
+        var emailValue = document.getElementById('pix-email').value.trim();
+        if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+            setError('Informe um e-mail válido ou deixe o campo em branco.');
+            return;
+        }
+        if (!idempotencyKey) idempotencyKey = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : String(Date.now()) + '-' + String(Math.random()).slice(2);
+        submitButton.disabled = true;
+        submitButton.textContent = 'GERANDO PIX...';
+        var externalId = 'wpp-' + idempotencyKey;
+        var payload = {
+            idempotencyKey: idempotencyKey,
+            externalId: externalId,
+            customer: {
+                name: document.getElementById('pix-name').value.trim(),
+                document: documentValue,
+                email: emailValue,
+                phone: document.getElementById('pix-phone').value.trim()
+            },
+            tracking: getTracking()
+        };
+        payload.tracking.eventId = externalId;
+        fetch('/api/sagacepay/sales', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(function (response) { return response.json().then(function (body) { return { ok: response.ok, body: body }; }); })
+            .then(function (result) {
+                if (!result.ok) throw new Error(result.body.error || 'Não foi possível gerar o PIX.');
+                showSale(result.body);
+            })
+            .catch(function (error) {
+                setError(error.message || 'Não foi possível gerar o PIX. Tente novamente.');
+                submitButton.disabled = false;
+                submitButton.textContent = 'GERAR PIX DE R$ 137,00';
+            });
+    });
+
+    document.querySelectorAll('a.checkout-link').forEach(function (link) { link.addEventListener('click', openModal); });
+    document.getElementById('pix-close').addEventListener('click', closeModal);
+    backButton.addEventListener('click', resetToForm);
+    modal.addEventListener('click', function (event) { if (event.target === modal) closeModal(); });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && !modal.hidden) closeModal(); });
+    copyButton.addEventListener('click', function () {
+        navigator.clipboard.writeText(codeField.value).then(function () {
+            copyButton.textContent = 'CÓDIGO COPIADO';
+            window.setTimeout(function () { copyButton.textContent = 'COPIAR CÓDIGO PIX'; }, 1800);
+        }).catch(function () {
+            codeField.focus(); codeField.select();
+            copyButton.textContent = 'SELECIONE E COPIE O CÓDIGO';
+        });
+    });
+})();
+</script>
 </body>
 </html>
