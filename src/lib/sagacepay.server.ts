@@ -207,6 +207,8 @@ export async function notifySaleEvent(input: SaleNotificationInput): Promise<boo
     process.env["SAGACEPAY_PRODUCT_NAME"]?.trim() ||
     SAGACEPAY_PRODUCT_NAME;
   const payload = {
+    title: input.status === "paid" ? "Venda aprovada 💸" : "Venda pendente",
+    text: `${productName} — ${input.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
     event: input.event,
     status: input.status,
     statusLabel:
