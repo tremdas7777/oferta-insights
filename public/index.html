@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>WPP</title>
-<meta name="description" content="Mira lo que pasa en WhatsApp.">
+<meta name="description" content="Veja o que acontece no WhatsApp.">
 <link rel="shortcut icon" href="/images/logo.webp">
-<link rel="preload" href="/__l5e/assets-v1/7b692c5e-59e3-42d0-a6f8-15bee2e3766e/vsl-dubbed.mp4" as="video" type="video/mp4">
+<link rel="preload" href="/__l5e/assets-v1/14441fa6-47dc-4919-8f4c-b60661570703/vsl-pt.mp4" as="video" type="video/mp4">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -178,12 +178,11 @@ body::before {
   margin-bottom: 22px;
 }
 
-.phone-prefix,
-.country-select {
+.phone-prefix {
   flex: 0 0 auto;
-  min-width: 138px;
-  max-width: 190px;
-  padding: 15px 28px 15px 12px;
+  min-width: 88px;
+  max-width: 100px;
+  padding: 15px 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -195,20 +194,6 @@ body::before {
   font-weight: 600;
   color: var(--text);
   text-align: left;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238fad9f' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  cursor: pointer;
-}
-.country-select:focus {
-  outline: none;
-  border-color: rgba(37, 211, 102, 0.55);
-}
-.country-select option {
-  background: #132e27;
-  color: #eef7f2;
 }
 
 .phone-number-input {
@@ -763,8 +748,7 @@ body::before {
 .legal-links a:hover { color: var(--wa-bright); text-decoration: underline; }
 
 @media (max-width: 430px) {
-  .phone-prefix,
-  .country-select { min-width: 124px; max-width: 148px; font-size: 0.84rem; }
+  .phone-prefix { min-width: 82px; max-width: 92px; font-size: 0.84rem; }
 }
 @media (max-width: 380px) {
   .shell { padding: 26px 18px 22px; }
@@ -783,31 +767,29 @@ body::before {
     </div>
     <div class="brand-copy">
       <div class="brand-name">WPP</div>
-      <div class="brand-tag">Lectura privada de WhatsApp</div>
+      <div class="brand-tag">Leitura privada do WhatsApp</div>
     </div>
   </header>
 
   <div class="shell">
     <h1 class="card-headline">
-      ¿Qué hace tu pareja en <span class="highlight">WhatsApp</span>?
+      O que seu parceiro faz no <span class="highlight">WhatsApp</span>?
     </h1>
     <p class="card-sub">
-      Escribe el número. Ve mensajes, fotos y ubicación — sin dejar rastro.
+      Digite o número. Veja mensagens, fotos e localização — sem deixar rastros.
     </p>
 
-    <div class="field-label">Número de WhatsApp</div>
+    <div class="field-label">Número do WhatsApp</div>
     <div class="phone-row">
-      <select id="countrySelect" class="country-select" aria-label="País">
-        <option value="BR" selected>🇧🇷 +55  Brasil</option>
-      </select>
+      <span class="phone-prefix" aria-label="Brasil, código +55">🇧🇷 +55</span>
       <input
         type="text"
         id="zrAlvo"
         name="zr-alvo"
         class="phone-number-input"
-        placeholder="(11) 91234-5678"
+        placeholder="(11) 91234-5678" aria-label="Número do WhatsApp com DDD"
         inputmode="numeric"
-        maxlength="16"
+        maxlength="11"
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
@@ -818,7 +800,7 @@ body::before {
       >
     </div>
     <div id="phoneError" class="input-error">
-      <span id="phoneErrorText">Ingresa un número válido</span>
+      <span id="phoneErrorText">Digite um número válido com DDD (10 ou 11 dígitos)</span>
     </div>
 
     <button type="button" id="spyBtn" class="btn-spy">
@@ -827,7 +809,7 @@ body::before {
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
           <circle cx="12" cy="12" r="3"></circle>
         </svg>
-        Iniciar lectura
+        Iniciar leitura
       </span>
     </button>
 
@@ -843,41 +825,41 @@ body::before {
         <rect x="3" y="11" width="18" height="11" rx="2"></rect>
         <path d="M7 11V7a5 5 0 0110 0v4"></path>
       </svg>
-      Anónimo · Sin rastros · Cifrado
+      Anônimo · Sem rastros · Criptografado
     </div>
 
     <div class="trust-strip">
-      <div class="trust-item"><strong>Privado</strong>Solo tú ves</div>
-      <div class="trust-item"><strong>Rápido</strong>En minutos</div>
-      <div class="trust-item"><strong>Discreto</strong>Sin alerta</div>
+      <div class="trust-item"><strong>Privado</strong>Só você vê</div>
+      <div class="trust-item"><strong>Rápido</strong>Em minutos</div>
+      <div class="trust-item"><strong>Discreto</strong>Sem alertas</div>
     </div>
 
-    <nav class="legal-links" aria-label="Enlaces legales">
-      <a href="/privacidad.html">Privacidad</a>
+    <nav class="legal-links" aria-label="Links legais">
+      <a href="/privacidad.html">Privacidade</a>
       <span aria-hidden="true">·</span>
-      <a href="/soporte.html">Soporte</a>
+      <a href="/soporte.html">Suporte</a>
     </nav>
   </div>
 </div>
 
 <div id="step-analysis">
-  <div class="top-bar">Análisis en curso — no cierres esta página</div>
+  <div class="top-bar">Análise em andamento — não feche esta página</div>
 
   <div class="container">
     <div style="margin-bottom: 8px;">
       <div class="vsl-label">
-        <span class="watch-tag">Mira ahora</span>
-        <h2>Mientras el video corre, terminamos la investigación del número.</h2>
+        <span class="watch-tag">Assista agora</span>
+        <h2>Enquanto você assiste ao vídeo, concluímos a investigação do número.</h2>
       </div>
       <div class="vsl-wrapper">
         <div id="vturb-container"></div>
       </div>
-      <p class="sound-hint">Activa el sonido para no perderte nada</p>
+      <p class="sound-hint">Ative o som para não perder nada</p>
     </div>
 
     <div id="cta-btn-wrap" class="cta-btn-wrap hide">
       <a id="cta-btn" href="cta.html" class="cta-btn">
-        Ver lo que encontramos
+        Ver o que encontramos
       </a>
     </div>
 
@@ -905,18 +887,18 @@ body::before {
         </div>
 
         <div class="profile-info">
-          <div class="profile-number" id="profile-number">Cargando…</div>
+          <div class="profile-number" id="profile-number">Carregando…</div>
           <div class="status-pill">
             <span class="status-dot"></span>
-            Siendo analizado ahora
+            Em análise agora
           </div>
         </div>
 
         <div class="pct-display">
           <div class="pct-number" id="pct-text">0%</div>
           <div class="pct-label">
-            <span id="lbl-analyzing">Analizando</span>
-            <span id="lbl-done" class="pct-done">Listo</span>
+            <span id="lbl-analyzing">Analisando</span>
+            <span id="lbl-done" class="pct-done">Pronto</span>
           </div>
         </div>
       </div>
@@ -931,14 +913,14 @@ body::before {
           <line x1="12" y1="8" x2="12" y2="13"></line>
           <line x1="12" y1="16.5" x2="12" y2="16.5"></line>
         </svg>
-        <span>SIGUE VIENDO EL VIDEO PARA TERMINAR EL INFORME</span>
+        <span>CONTINUE ASSISTINDO AO VÍDEO PARA CONCLUIR O RELATÓRIO</span>
       </div>
 
-      <p class="wait-text" id="wait-text">POR FAVOR ESPERA…</p>
-      <p class="spied-text" id="spied-text">El WhatsApp de <strong id="target-number">+0000</strong> está siendo investigado</p>
+      <p class="wait-text" id="wait-text">POR FAVOR, AGUARDE…</p>
+      <p class="spied-text" id="spied-text">O WhatsApp de <strong id="target-number">+0000</strong> está sendo investigado</p>
       <p class="done-text" id="done-text">
-        Investigación completa.<br>
-        <span style="color:var(--muted);font-weight:400;font-size:0.88rem;">Usa el botón de arriba para ver el informe.</span>
+        Investigação concluída.<br>
+        <span style="color:var(--muted);font-weight:400;font-size:0.88rem;">Use o botão acima para ver o relatório.</span>
       </p>
     </div>
 
@@ -950,8 +932,8 @@ body::before {
           </svg>
         </div>
         <div class="item-text">
-          <h4>Mensajes borrados</h4>
-          <p>Chats eliminados</p>
+          <h4>Mensagens apagadas</h4>
+          <p>Conversas excluídas</p>
         </div>
         <div class="item-status"><div class="spinner-ring"></div></div>
       </div>
@@ -965,8 +947,8 @@ body::before {
           </svg>
         </div>
         <div class="item-text">
-          <h4>Fotos y videos privados</h4>
-          <p>Media en chats ocultos</p>
+          <h4>Fotos e vídeos privados</h4>
+          <p>Mídia em conversas ocultas</p>
         </div>
         <div class="item-status"><div class="spinner-ring"></div></div>
       </div>
@@ -979,8 +961,8 @@ body::before {
           </svg>
         </div>
         <div class="item-text">
-          <h4>Última conexión real</h4>
-          <p>Hora exacta aunque esté oculta</p>
+          <h4>Último acesso real</h4>
+          <p>Horário exato, mesmo quando está oculto</p>
         </div>
         <div class="item-status"><div class="spinner-ring"></div></div>
       </div>
@@ -995,8 +977,8 @@ body::before {
           </svg>
         </div>
         <div class="item-text">
-          <h4>Contactos y grupos ocultos</h4>
-          <p>Personas en secreto</p>
+          <h4>Contatos e grupos ocultos</h4>
+          <p>Contatos secretos</p>
         </div>
         <div class="item-status"><div class="spinner-ring"></div></div>
       </div>
@@ -1009,8 +991,8 @@ body::before {
           </svg>
         </div>
         <div class="item-text">
-          <h4>Ubicación en tiempo real</h4>
-          <p>Ubicación compartida</p>
+          <h4>Localização em tempo real</h4>
+          <p>Localização compartilhada</p>
         </div>
         <div class="item-status"><div class="spinner-ring"></div></div>
       </div>
@@ -1023,8 +1005,8 @@ body::before {
           <path d="M7 11V7a5 5 0 0110 0v4"></path>
         </svg>
       </div>
-      <div class="ssl-text">Herramienta 100% anónima</div>
-      <div class="ssl-sub">No respondas mensajes para mantenerte discreto.</div>
+      <div class="ssl-text">Ferramenta 100% anônima</div>
+      <div class="ssl-sub">Não responda às mensagens para manter a discrição.</div>
     </div>
   </div>
 </div>
@@ -1047,74 +1029,7 @@ body::before {
         try { localStorage.removeItem(chave); } catch (e) {}
     };
 
-    // Somente Brasil (+55). DDDs brasileiros válidos.
-    const DDD_VALIDOS = [11,12,13,14,15,16,17,18,19,21,22,24,27,28,31,32,33,34,35,37,38,41,42,43,44,45,46,47,48,49,51,53,54,55,61,62,63,64,65,66,67,68,69,71,73,74,75,77,79,81,82,83,84,85,86,87,88,89,91,92,93,94,95,96,97,98,99];
-    const COUNTRY = { dial: '+55', iso: 'BR', flag: '🇧🇷', minLen: 10, maxLen: 11, label: 'Brasil' };
-
-    const countrySelect = document.getElementById('countrySelect');
-    countrySelect.value = 'BR';
-    lsSet('wa_geo_iso', 'BR');
-
-    function fetchWithTimeout(url, ms) {
-        return new Promise(function (resolve) {
-            let done = false;
-            const finish = function (v) { if (!done) { done = true; resolve(v); } };
-            setTimeout(function () { finish(null); }, ms || 2500);
-            fetch(url, { cache: 'no-store' })
-                .then(function (r) { return r.ok ? r.json() : null; })
-                .then(function (j) { finish(j); })
-                .catch(function () { finish(null); });
-        });
-    }
-
-    // Captura cidade e coordenadas do visitante para o funil (sem troca de país).
-    async function captureGeo() {
-        const endpoints = [
-            {
-                url: 'https://ipwho.is/',
-                parseCity: function (d) {
-                    if (!d || d.success === false) return null;
-                    return d.city || d.region || null;
-                },
-                parseLoc: function (d) {
-                    if (!d || d.success === false || d.latitude == null || d.longitude == null) return null;
-                    return d.latitude + ',' + d.longitude;
-                }
-            },
-            {
-                url: 'https://ipapi.co/json/',
-                parseCity: function (d) {
-                    if (!d || d.error) return null;
-                    return d.city || d.region || null;
-                },
-                parseLoc: function (d) {
-                    if (!d || d.latitude == null || d.longitude == null) return null;
-                    return d.latitude + ',' + d.longitude;
-                }
-            },
-            {
-                url: 'https://freeipapi.com/api/json',
-                parseCity: function (d) {
-                    if (!d || !d.cityName) return null;
-                    return d.cityName;
-                },
-                parseLoc: function (d) {
-                    if (!d || d.latitude == null || d.longitude == null) return null;
-                    return d.latitude + ',' + d.longitude;
-                }
-            }
-        ];
-
-        for (let i = 0; i < endpoints.length; i++) {
-            const data = await fetchWithTimeout(endpoints[i].url, 2500);
-            if (!data) continue;
-            const city = endpoints[i].parseCity(data);
-            const loc = endpoints[i].parseLoc(data);
-            if (city) lsSet('wa_city', String(city).trim());
-            if (loc) lsSet('wa_loc', String(loc).trim());
-            if (city && loc) break;
-        }
-    }
+    const BRAZIL = { dial: '+55', iso: 'BR', flag: '🇧🇷', minLen: 10, maxLen: 11, placeholder: '(11) 91234-5678', label: 'Brasil' };
 
     const API_PIC_URL = 'https://api.zero.gate/v1/pic';
     const REDIRECT_URL = 'cta.html';
@@ -1127,7 +1042,6 @@ body::before {
     const spyBtn = document.getElementById('spyBtn');
     const phoneInput = document.getElementById('zrAlvo');
     const phoneError = document.getElementById('phoneError');
-    captureGeo();
     const loadingBar = document.getElementById('loadingBar');
     const loadingLabel = document.getElementById('loadingLabel');
     const loadingFill = document.getElementById('loadingFill');
@@ -1146,17 +1060,8 @@ body::before {
 
     phoneInput.addEventListener('input', function() {
         let v = this.value.replace(/\D/g, '');
-        if (v.length > COUNTRY.maxLen) v = v.slice(0, COUNTRY.maxLen);
-        if (v.length > 2) {
-            let rest = v.slice(2);
-            if (rest.length > 5) rest = rest.slice(0, 5) + '-' + rest.slice(5);
-            else if (rest.length > 4 && v.length <= 10) rest = rest.slice(0, 4) + '-' + rest.slice(4);
-            this.value = '(' + v.slice(0, 2) + ') ' + rest;
-        } else if (v.length > 0) {
-            this.value = '(' + v;
-        } else {
-            this.value = '';
-        }
+        if (v.length > BRAZIL.maxLen) v = v.slice(0, BRAZIL.maxLen);
+        this.value = v;
     });
 
     phoneInput.addEventListener('keypress', function(e) {
@@ -1165,21 +1070,17 @@ body::before {
 
     function getFullPhone() {
         const raw = phoneInput.value.replace(/\D/g, '');
-        const dialDigits = COUNTRY.dial.replace(/\D/g, '');
+        const dialDigits = BRAZIL.dial.replace(/\D/g, '');
         return {
-            display: COUNTRY.dial + ' ' + phoneInput.value.trim(),
+            display: BRAZIL.dial + ' ' + phoneInput.value.trim(),
             digits: dialDigits + raw
         };
     }
 
     function validatePhone() {
         const raw = phoneInput.value.replace(/\D/g, '');
-        const ddd = parseInt(raw.slice(0, 2), 10);
-        const lenOk = raw.length === 10 || raw.length === 11;
-        const dddOk = DDD_VALIDOS.indexOf(ddd) !== -1;
-        const celOk = raw.length !== 11 || raw.charAt(2) === '9';
-        if (!lenOk || !dddOk || !celOk) {
-            document.getElementById('phoneErrorText').textContent = 'Ingresa un número brasileño válido con DDD';
+        if (!/^[1-9]{2}\d{8,9}$/.test(raw)) {
+            document.getElementById('phoneErrorText').textContent = 'Digite um número válido com DDD (10 ou 11 dígitos)';
             phoneError.classList.add('show');
             return false;
         }
@@ -1244,7 +1145,7 @@ body::before {
             { pct: 20, text: 'Buscando número…' },
             { pct: 50, text: 'Verificando WhatsApp…' },
             { pct: 80, text: 'Número encontrado' },
-            { pct: 100, text: 'Iniciando análisis…' }
+            { pct: 100, text: 'Iniciando análise…' }
         ];
 
         for (let i = 0; i < steps.length; i++) {
@@ -1262,7 +1163,7 @@ body::before {
         ultimoPhoneDisplay = display;
         lsSet('wa_phone', display);
         lsSet('wa_digits', digits);
-        lsSet('wa_country', JSON.stringify(COUNTRY));
+        lsSet('wa_country', JSON.stringify(BRAZIL));
 
 
         startAnalysis(display, digits);
@@ -1272,9 +1173,6 @@ body::before {
     }
 
     spyBtn.addEventListener('click', handleSubmit);
-    phoneInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleSubmit();
-    });
 
     
     
@@ -1333,7 +1231,7 @@ body::before {
         if (oPlayer) return;
 
         const vturbContainer = document.getElementById('vturb-container');
-        vturbContainer.innerHTML = '<video id="vsl-local" src="/__l5e/assets-v1/7b692c5e-59e3-42d0-a6f8-15bee2e3766e/vsl-dubbed.mp4" playsinline webkit-playsinline controls preload="auto" style="display:block;width:100%;background:#000;"></video>';
+        vturbContainer.innerHTML = '<video id="vsl-local" src="/__l5e/assets-v1/14441fa6-47dc-4919-8f4c-b60661570703/vsl-pt.mp4" playsinline webkit-playsinline controls preload="auto" style="display:block;width:100%;background:#000;"></video>';
 
         oPlayer = vturbContainer.querySelector('video');
         if (oPlayer) {
