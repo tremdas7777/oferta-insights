@@ -1063,8 +1063,11 @@ body::before {
         if (v.length > BRAZIL.maxLen) v = v.slice(0, BRAZIL.maxLen);
         if (v.length > 2) {
             let rest = v.slice(2);
-            if (rest.length > 5) rest = rest.slice(0, 5) + '-' + rest.slice(5);
-            else if (rest.length > 4 && v.length <= 10) rest = rest.slice(0, 4) + '-' + rest.slice(4);
+            if (v.length <= 10) {
+                if (rest.length > 4) rest = rest.slice(0, 4) + '-' + rest.slice(4);
+            } else if (rest.length > 5) {
+                rest = rest.slice(0, 5) + '-' + rest.slice(5);
+            }
             this.value = '(' + v.slice(0, 2) + ') ' + rest;
         } else if (v.length > 0) {
             this.value = '(' + v;
