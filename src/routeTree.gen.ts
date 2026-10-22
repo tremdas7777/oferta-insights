@@ -16,6 +16,7 @@ import { Route as ApiAdminAuthRouteImport } from './routes/api/admin/auth'
 import { Route as ApiAdminFunnelEventsRouteImport } from './routes/api/admin/funnel-events'
 import { Route as ApiAdminOrdersRouteImport } from './routes/api/admin/orders'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin/settings'
+import { Route as ApiAdminTestOrderRouteImport } from './routes/api/admin/test-order'
 import { Route as ApiFunnelEventsRouteImport } from './routes/api/funnel/events'
 import { Route as ApiSagacepaySalesRouteImport } from './routes/api/sagacepay/sales'
 import { Route as ApiSagacepayWebhookRouteImport } from './routes/api/sagacepay/webhook'
@@ -56,6 +57,11 @@ const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
   path: '/api/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminTestOrderRoute = ApiAdminTestOrderRouteImport.update({
+  id: '/api/admin/test-order',
+  path: '/api/admin/test-order',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiFunnelEventsRoute = ApiFunnelEventsRouteImport.update({
   id: '/api/funnel/events',
   path: '/api/funnel/events',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/funnel-events': typeof ApiAdminFunnelEventsRoute
   '/api/admin/orders': typeof ApiAdminOrdersRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/test-order': typeof ApiAdminTestOrderRoute
   '/api/funnel/events': typeof ApiFunnelEventsRoute
   '/api/sagacepay/sales': typeof ApiSagacepaySalesRouteWithChildren
   '/api/sagacepay/webhook': typeof ApiSagacepayWebhookRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/api/admin/funnel-events': typeof ApiAdminFunnelEventsRoute
   '/api/admin/orders': typeof ApiAdminOrdersRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/test-order': typeof ApiAdminTestOrderRoute
   '/api/funnel/events': typeof ApiFunnelEventsRoute
   '/api/sagacepay/sales': typeof ApiSagacepaySalesRouteWithChildren
   '/api/sagacepay/webhook': typeof ApiSagacepayWebhookRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/api/admin/funnel-events': typeof ApiAdminFunnelEventsRoute
   '/api/admin/orders': typeof ApiAdminOrdersRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/test-order': typeof ApiAdminTestOrderRoute
   '/api/funnel/events': typeof ApiFunnelEventsRoute
   '/api/sagacepay/sales': typeof ApiSagacepaySalesRouteWithChildren
   '/api/sagacepay/webhook': typeof ApiSagacepayWebhookRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/api/admin/funnel-events'
     | '/api/admin/orders'
     | '/api/admin/settings'
+    | '/api/admin/test-order'
     | '/api/funnel/events'
     | '/api/sagacepay/sales'
     | '/api/sagacepay/webhook'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/api/admin/funnel-events'
     | '/api/admin/orders'
     | '/api/admin/settings'
+    | '/api/admin/test-order'
     | '/api/funnel/events'
     | '/api/sagacepay/sales'
     | '/api/sagacepay/webhook'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/api/admin/funnel-events'
     | '/api/admin/orders'
     | '/api/admin/settings'
+    | '/api/admin/test-order'
     | '/api/funnel/events'
     | '/api/sagacepay/sales'
     | '/api/sagacepay/webhook'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   ApiAdminFunnelEventsRoute: typeof ApiAdminFunnelEventsRoute
   ApiAdminOrdersRoute: typeof ApiAdminOrdersRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
+  ApiAdminTestOrderRoute: typeof ApiAdminTestOrderRoute
   ApiFunnelEventsRoute: typeof ApiFunnelEventsRoute
   ApiSagacepaySalesRoute: typeof ApiSagacepaySalesRouteWithChildren
   ApiSagacepayWebhookRoute: typeof ApiSagacepayWebhookRoute
@@ -223,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/test-order': {
+      id: '/api/admin/test-order'
+      path: '/api/admin/test-order'
+      fullPath: '/api/admin/test-order'
+      preLoaderRoute: typeof ApiAdminTestOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/funnel/events': {
       id: '/api/funnel/events'
       path: '/api/funnel/events'
@@ -273,6 +293,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminFunnelEventsRoute: ApiAdminFunnelEventsRoute,
   ApiAdminOrdersRoute: ApiAdminOrdersRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
+  ApiAdminTestOrderRoute: ApiAdminTestOrderRoute,
   ApiFunnelEventsRoute: ApiFunnelEventsRoute,
   ApiSagacepaySalesRoute: ApiSagacepaySalesRouteWithChildren,
   ApiSagacepayWebhookRoute: ApiSagacepayWebhookRoute,

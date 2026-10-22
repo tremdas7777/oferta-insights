@@ -81,6 +81,8 @@ function AdminPage() {
   const [saved, setSaved] = useState("");
   const [testingNotification, setTestingNotification] = useState(false);
   const [testNotificationMessage, setTestNotificationMessage] = useState("");
+  const [creatingTestOrder, setCreatingTestOrder] = useState(false);
+  const [testOrderMessage, setTestOrderMessage] = useState("");
 
   const request = async (path: string, init?: RequestInit) => {
     const response = await fetch(path, {
@@ -318,6 +320,8 @@ function AdminPage() {
             saved={saved}
             testingNotification={testingNotification}
             testNotificationMessage={testNotificationMessage}
+            creatingTestOrder={creatingTestOrder}
+            testOrderMessage={testOrderMessage}
             onTest={async () => {
               setTestNotificationMessage("");
               setError("");
@@ -332,6 +336,22 @@ function AdminPage() {
                 setError(cause instanceof Error ? cause.message : "Não foi possível testar.");
               } finally {
                 setTestingNotification(false);
+              }
+            }}
+            onCreateTestOrder={async () => {
+              setTestOrderMessage("");
+              setError("");
+              setCreatingTestOrder(true);
+              try {
+                const result = await request("/api/admin/test-order", { method: "POST" });
+                setTestOrderMessage(
+                  `Pedido ${result.id} criado como ${result.status}. O pedido apareceu no histórico e a notificação pendente foi enviada.`,
+                );
+                await loadDashboard();
+              } catch (cause) {
+                setError(cause instanceof Error ? cause.message : "Não foi possível gerar o pedido de teste.");
+              } finally {
+                setCreatingTestOrder(false);
               }
             }}
             onSave={async () => {
@@ -759,7 +779,10 @@ function Settings({
   saved,
   testingNotification,
   testNotificationMessage,
+  creatingTestOrder,
+  testOrderMessage,
   onTest,
+  onCreateTestOrder,
   onSave,
 }: {
   settings: {
@@ -781,7 +804,10 @@ function Settings({
   saved: string;
   testingNotification: boolean;
   testNotificationMessage: string;
+  creatingTestOrder: boolean;
+  testOrderMessage: string;
   onTest: () => void;
+  onCreateTestOrder: () => void;
   onSave: () => void;
 }) {
   return (
@@ -858,10 +884,19 @@ function Settings({
           >
             {testingNotification ? "Enviando teste..." : "Testar notificação"}
           </button>
+          <button
+            type="button"
+            onClick={onCreateTestOrder}
+            disabled={creatingTestOrder}
+            className="rounded-xl border border-sky-400/50 px-4 py-3 font-bold text-sky-200 hover:bg-sky-400/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {creatingTestOrder ? "Gerando pedido..." : "Gerar pedido de teste"}
+          </button>
         </div>
         {testNotificationMessage && (
           <p className="mt-3 text-sm text-amber-200">{testNotificationMessage}</p>
         )}
+        {testOrderMessage && <p className="mt-3 text-sm text-sky-200">{testOrderMessage}</p>}
       </section>
       <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
         <h2 className="font-semibold">Checklist de ativação</h2>
