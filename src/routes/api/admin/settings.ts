@@ -15,7 +15,11 @@ export const Route = createFileRoute("/api/admin/settings")({
         if (!(await isAdminRequest(request))) return unauthorized();
         const settings = await readSagacePaySettings();
         const apiKey = settings?.api_key?.trim() ?? "";
-        const gateway = settings?.gateway_provider === "sagacepay" ? "sagacepay" : "umbrella";
+        const gateway =
+          settings?.gateway_provider === "sagacepay" ||
+          settings?.postback_url === "gateway:sagacepay"
+            ? "sagacepay"
+            : "umbrella";
         const umbrella = await getUmbrellaKeySource();
         const utmfyApiToken =
           settings?.utmfy_api_token?.trim() || process.env["UTMFY_API_TOKEN"]?.trim() || "";
@@ -126,11 +130,15 @@ export const Route = createFileRoute("/api/admin/settings")({
         }
         try {
           await saveSagacePaySettings({
-            gateway_provider: gateway,
             api_key: apiKey,
             webhook_secret: webhookSecret,
             utmfy_api_token: utmfyApiToken || null,
-            postback_url: null,
+            postback_url:
+              gateway === "sagacepay"
+                ? "gateway:sagacepay"
+                : current.postback_url?.startsWith("umbrella-key:")
+                  ? current.postback_url
+                  : null,
             notification_webhook_url: notificationWebhookUrl || null,
             product_name: productName,
             amount,

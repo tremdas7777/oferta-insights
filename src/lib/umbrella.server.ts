@@ -15,6 +15,8 @@ async function db() {
   return supabaseAdmin;
 }
 
+const LEGACY_PREFIX = "umbrella-key:";
+
 /** Chave salva no /admin (se houver). */
 async function savedKey(): Promise<string | null> {
   const { data } = await (
@@ -24,7 +26,16 @@ async function savedKey(): Promise<string | null> {
     .select("value")
     .eq("key", KEY)
     .maybeSingle();
-  return (data?.value as string | null) || null;
+  if (data?.value) return data.value as string;
+  const { data: legacy } = await (
+    await db()
+  )
+    .from("sagacepay_settings")
+    .select("postback_url")
+    .eq("id", true)
+    .maybeSingle();
+  const marker = typeof legacy?.postback_url === "string" ? legacy.postback_url : "";
+  return marker.startsWith(LEGACY_PREFIX) ? marker.slice(LEGACY_PREFIX.length) : null;
 }
 
 /** Chave em uso: a do /admin ou, sem ela, o secret. */
@@ -52,7 +63,14 @@ export async function saveUmbrellaKey(value: string): Promise<void> {
   )
     .from("private_settings")
     .upsert({ key: KEY, value, updated_at: new Date().toISOString() });
-  if (error) throw new Error(error.message);
+  if (error) {
+    const { error: legacyError } = await (await db()).from("sagacepay_settings").upsert({
+      id: true,
+      postback_url: `${LEGACY_PREFIX}${value}`,
+      updated_at: new Date().toISOString(),
+    });
+    if (legacyError) throw new Error(legacyError.message);
+  }
   cache = null;
 }
 
