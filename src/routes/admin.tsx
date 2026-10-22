@@ -665,7 +665,7 @@ function Settings({
           <li>{meta.configured ? "✓" : "○"} API Key configurada</li>
           <li>{meta.webhookConfigured ? "✓" : "○"} Webhook Secret configurado</li>
           <li>○ Migração Supabase aplicada</li>
-          <li>○ Webhook cadastrado no painel SagacePay</li>
+          <li>✓ Webhook automático — segue o domínio que estiver no ar</li>
         </ul>
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4 text-xs leading-5 text-slate-500">
           Endpoint: <code className="text-slate-300">/api/sagacepay/webhook</code>
