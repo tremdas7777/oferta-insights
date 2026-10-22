@@ -59,6 +59,8 @@ function AdminPage() {
     apiKey: "",
     webhookSecret: "",
     amount: "137",
+    notificationWebhookUrl: "",
+    productName: "Ebook Amoroso",
   });
   const [webhookEndpoint, setWebhookEndpoint] = useState("");
   const [settingsMeta, setSettingsMeta] = useState({
@@ -106,6 +108,8 @@ function AdminPage() {
       setSettings((current) => ({
         ...current,
         amount: String(data.amount ?? 137),
+        notificationWebhookUrl: String(data.notificationWebhookUrl ?? ""),
+        productName: String(data.productName ?? "Ebook Amoroso"),
       }));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Erro ao carregar configurações.");
@@ -594,11 +598,19 @@ function Settings({
   saved,
   onSave,
 }: {
-  settings: { apiKey: string; webhookSecret: string; amount: string };
+  settings: {
+    apiKey: string;
+    webhookSecret: string;
+    amount: string;
+    notificationWebhookUrl: string;
+    productName: string;
+  };
   setSettings: (value: {
     apiKey: string;
     webhookSecret: string;
     amount: string;
+    notificationWebhookUrl: string;
+    productName: string;
   }) => void;
   meta: { configured: boolean; webhookConfigured: boolean; apiKeyLast4: string };
   webhookEndpoint: string;
@@ -650,6 +662,18 @@ function Settings({
             value={settings.amount}
             onChange={(value) => setSettings({ ...settings, amount: value })}
           />
+          <Field
+            label="Webhook de notificações (Pushcut)"
+            placeholder="https://api.pushcut.io/..."
+            value={settings.notificationWebhookUrl}
+            onChange={(value) => setSettings({ ...settings, notificationWebhookUrl: value })}
+          />
+          <Field
+            label="Info produto (gateway e notificações)"
+            placeholder="Ebook Amoroso"
+            value={settings.productName}
+            onChange={(value) => setSettings({ ...settings, productName: value })}
+          />
         </div>
         {saved && <p className="mt-4 text-sm text-emerald-300">{saved}</p>}
         <button
@@ -665,14 +689,16 @@ function Settings({
           <li>{meta.configured ? "✓" : "○"} API Key configurada</li>
           <li>{meta.webhookConfigured ? "✓" : "○"} Webhook Secret configurado</li>
           <li>○ Migração Supabase aplicada</li>
-          <li>✓ Webhook automático — segue o domínio que estiver no ar</li>
+          <li>{settings.notificationWebhookUrl ? "✓" : "○"} Webhook de notificações configurado</li>
+          <li>✓ Eventos enviados: venda pendente e venda paga</li>
         </ul>
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4 text-xs leading-5 text-slate-500">
           Endpoint: <code className="text-slate-300">/api/sagacepay/webhook</code>
           <br />
-          Eventos importantes: <code className="text-slate-300">sale.paid</code>,{" "}
+          Eventos de gateway: <code className="text-slate-300">sale.paid</code>,{" "}
           <code className="text-slate-300">sale.failed</code>,{" "}
           <code className="text-slate-300">sale.expired</code>
+          <br />O webhook de notificações recebe o mesmo endpoint para os eventos pendente e pago.
         </div>
       </section>
     </div>

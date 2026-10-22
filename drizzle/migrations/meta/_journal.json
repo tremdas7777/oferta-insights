@@ -8,6 +8,13 @@
       "when": 1792643724132,
       "tag": "0000_sagacepay_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792656838742,
+      "tag": "0001_sale_notifications",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,8 @@ export type SagacePaySettings = {
   api_key?: string | null | undefined;
   webhook_secret?: string | null | undefined;
   postback_url?: string | null | undefined;
+  notification_webhook_url?: string | null | undefined;
+  product_name?: string | null | undefined;
   amount?: number | string | null | undefined;
 };
 

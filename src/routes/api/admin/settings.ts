@@ -24,6 +24,8 @@ export const Route = createFileRoute("/api/admin/settings")({
           ),
           postbackUrl: webhookUrl(request),
           amount: Number(settings?.amount ?? 137),
+          notificationWebhookUrl: settings?.notification_webhook_url ?? "",
+          productName: settings?.product_name ?? "Ebook Amoroso",
         });
       },
       POST: async ({ request }) => {
@@ -39,17 +41,38 @@ export const Route = createFileRoute("/api/admin/settings")({
             ? body["webhookSecret"].trim()
             : current.webhook_secret;
         const amount = Number(body["amount"] ?? current.amount ?? 137);
+        const notificationWebhookUrl =
+          typeof body["notificationWebhookUrl"] === "string"
+            ? body["notificationWebhookUrl"].trim()
+            : (current.notification_webhook_url ?? "");
+        const productName =
+          typeof body["productName"] === "string" && body["productName"].trim()
+            ? body["productName"].trim().slice(0, 120)
+            : current.product_name?.trim() || "Ebook Amoroso";
         if (!apiKey || !webhookSecret || !Number.isFinite(amount) || amount <= 0) {
           return Response.json(
             { error: "Informe API key, webhook secret e um valor válido." },
             { status: 400 },
           );
         }
+        if (notificationWebhookUrl) {
+          try {
+            const parsedUrl = new URL(notificationWebhookUrl);
+            if (parsedUrl.protocol !== "https:") throw new Error("HTTPS required");
+          } catch {
+            return Response.json(
+              { error: "O webhook de notificações deve ser uma URL HTTPS válida." },
+              { status: 400 },
+            );
+          }
+        }
         try {
           await saveSagacePaySettings({
             api_key: apiKey,
             webhook_secret: webhookSecret,
             postback_url: null,
+            notification_webhook_url: notificationWebhookUrl || null,
+            product_name: productName,
             amount,
           });
           return Response.json({ ok: true });

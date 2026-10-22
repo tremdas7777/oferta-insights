@@ -3,13 +3,14 @@ import { readSagacePaySettings } from "@/lib/admin-data.server";
 const DEFAULT_SAGACEPAY_BASE_URL = "https://sagacepay.com/api";
 
 export const SAGACEPAY_AMOUNT = 137;
-export const SAGACEPAY_PRODUCT_NAME = "Acesso WPP — 1 ano";
+export const SAGACEPAY_PRODUCT_NAME = "Ebook Amoroso";
 
 export type SagacePayRuntimeConfig = {
   apiKey: string;
   webhookSecret: string;
   baseUrl: string;
   amount: number;
+  productName: string;
 };
 
 type SagacePayErrorPayload = {
@@ -47,6 +48,7 @@ export async function getSagacePayRuntimeConfig(): Promise<SagacePayRuntimeConfi
     settings?.webhook_secret?.trim() || process.env["SAGACEPAY_WEBHOOK_SECRET"] || "";
   const configuredBaseUrl = process.env["SAGACEPAY_BASE_URL"] ?? DEFAULT_SAGACEPAY_BASE_URL;
   const configuredAmount = Number(settings?.amount ?? SAGACEPAY_AMOUNT);
+  const productName = settings?.product_name?.trim() || SAGACEPAY_PRODUCT_NAME;
 
   if (!apiKey) {
     throw new SagacePayConfigError("SAGACEPAY_API_KEY não está configurada no servidor.");
@@ -56,6 +58,7 @@ export async function getSagacePayRuntimeConfig(): Promise<SagacePayRuntimeConfi
     apiKey,
     webhookSecret,
     baseUrl: configuredBaseUrl.replace(/\/$/, ""),
+    productName,
     amount:
       Number.isFinite(configuredAmount) && configuredAmount > 0
         ? configuredAmount
@@ -120,7 +123,7 @@ export async function createSagacePaySale(input: CreateSaleInput): Promise<SaleR
   const config = await getSagacePayRuntimeConfig();
   const body: Record<string, unknown> = {
     amount: config.amount,
-    description: SAGACEPAY_PRODUCT_NAME,
+    description: config.productName,
     expirationInSeconds: 86400,
     externalId: input.externalId,
     customer: {
@@ -131,7 +134,7 @@ export async function createSagacePaySale(input: CreateSaleInput): Promise<SaleR
     },
     items: [
       {
-        description: SAGACEPAY_PRODUCT_NAME,
+        description: config.productName,
         quantity: 1,
         unitPrice: config.amount,
         tangible: false,
@@ -170,11 +173,70 @@ export async function getWebhookSecret(): Promise<string> {
   }
 }
 
+export type SaleNotificationInput = {
+  event: "sale.pending" | "sale.paid";
+  saleId: string;
+  externalId?: string;
+  status: "pending" | "paid";
+  amount: number;
+  productName?: string;
+  customer?: { name?: string; email?: string; document?: string; phone?: string };
+};
+
+export async function notifySaleEvent(input: SaleNotificationInput): Promise<void> {
+  const settings = await readSagacePaySettings();
+  const endpoint = settings?.notification_webhook_url?.trim();
+  if (!endpoint) return;
+
+  let url: URL;
+  try {
+    url = new URL(endpoint);
+    if (url.protocol !== "https:") throw new Error("Webhook de notificação deve usar HTTPS.");
+  } catch (error) {
+    console.warn("[Notifications] invalid notification webhook URL", error);
+    return;
+  }
+
+  const productName =
+    input.productName?.trim() || settings?.product_name?.trim() || SAGACEPAY_PRODUCT_NAME;
+  const payload = {
+    event: input.event,
+    status: input.status,
+    statusLabel: input.status === "paid" ? "paga" : "pendente",
+    saleId: input.saleId,
+    externalId: input.externalId ?? null,
+    amount: input.amount,
+    amountFormatted: input.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+    currency: "BRL",
+    product: productName,
+    productName,
+    infoProduto: productName,
+    "Info produto": productName,
+    occurredAt: new Date().toISOString(),
+    customer: input.customer ?? null,
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    if (!response.ok) console.warn(`[Notifications] webhook returned HTTP ${response.status}`);
+  } catch (error) {
+    console.warn("[Notifications] unable to deliver sale notification", error);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 // O webhook é sempre derivado do domínio da requisição: qualquer domínio
 // conectado ao projeto funciona sem configuração extra.
 export function webhookUrl(request: Request): string {
-  const proto =
-    request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || "https";
+  const proto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || "https";
   const host =
     request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
     request.headers.get("host") ||

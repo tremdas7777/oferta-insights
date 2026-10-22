@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   createSagacePaySale,
+  notifySaleEvent,
   toPublicApiError,
   webhookUrl,
   type CreateSaleInput,
@@ -94,18 +95,28 @@ export const Route = createFileRoute("/api/sagacepay/sales")({
 
           const sale = await createSagacePaySale(saleInput);
           if (typeof sale.id === "string") {
+            const amount = typeof sale.amount === "number" ? sale.amount : 137;
+            const status = typeof sale.status === "string" ? sale.status : "pending";
             try {
               await recordOrder({
                 saleId: sale.id,
                 externalId,
-                status: typeof sale.status === "string" ? sale.status : "pending",
-                amount: typeof sale.amount === "number" ? sale.amount : 137,
+                status,
+                amount,
                 customer: saleInput.customer,
                 rawData: sale,
               });
             } catch (storageError) {
               console.warn("[SagacePay] unable to persist order", storageError);
             }
+            await notifySaleEvent({
+              event: "sale.pending",
+              saleId: sale.id,
+              externalId,
+              status: "pending",
+              amount,
+              customer: saleInput.customer,
+            });
           }
           return Response.json({
             id: sale.id,

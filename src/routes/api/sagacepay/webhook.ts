@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getWebhookSecret } from "@/lib/sagacepay.server";
+import { getWebhookSecret, notifySaleEvent } from "@/lib/sagacepay.server";
 import { recordOrder } from "@/lib/admin-data.server";
 
 const REPLAY_WINDOW_SECONDS = 300;
@@ -11,6 +11,12 @@ type WebhookPayload = {
     status?: unknown;
     externalId?: unknown;
     amount?: unknown;
+    customer?: {
+      name?: unknown;
+      email?: unknown;
+      document?: unknown;
+      phone?: unknown;
+    };
   };
 };
 
@@ -79,16 +85,18 @@ export const Route = createFileRoute("/api/sagacepay/webhook")({
         console.info(`[SagacePay] webhook received event=${event} sale=${saleId}`);
 
         if (saleId !== "unknown" && payload.data) {
+          const status =
+            typeof payload.data.status === "string"
+              ? payload.data.status
+              : event.replace("sale.", "");
+          const amount = typeof payload.data.amount === "number" ? payload.data.amount : 137;
           try {
             await recordOrder({
               saleId,
               externalId:
                 typeof payload.data.externalId === "string" ? payload.data.externalId : undefined,
-              status:
-                typeof payload.data.status === "string"
-                  ? payload.data.status
-                  : event.replace("sale.", ""),
-              amount: typeof payload.data.amount === "number" ? payload.data.amount : 137,
+              status,
+              amount,
               paidAt: event === "sale.paid" ? new Date().toISOString() : undefined,
               rawData: payload,
             });
@@ -98,6 +106,25 @@ export const Route = createFileRoute("/api/sagacepay/webhook")({
               { error: "Não foi possível registrar o webhook." },
               { status: 500 },
             );
+          }
+          if (event === "sale.paid" || status === "paid") {
+            const customer = payload.data.customer;
+            await notifySaleEvent({
+              event: "sale.paid",
+              saleId,
+              externalId:
+                typeof payload.data.externalId === "string" ? payload.data.externalId : undefined,
+              status: "paid",
+              amount,
+              customer: customer
+                ? {
+                    name: typeof customer.name === "string" ? customer.name : undefined,
+                    email: typeof customer.email === "string" ? customer.email : undefined,
+                    document: typeof customer.document === "string" ? customer.document : undefined,
+                    phone: typeof customer.phone === "string" ? customer.phone : undefined,
+                  }
+                : undefined,
+            });
           }
         }
 
