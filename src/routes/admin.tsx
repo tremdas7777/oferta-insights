@@ -58,9 +58,9 @@ function AdminPage() {
   const [settings, setSettings] = useState({
     apiKey: "",
     webhookSecret: "",
-    postbackUrl: "",
     amount: "137",
   });
+  const [webhookEndpoint, setWebhookEndpoint] = useState("");
   const [settingsMeta, setSettingsMeta] = useState({
     configured: false,
     webhookConfigured: false,
@@ -102,9 +102,9 @@ function AdminPage() {
     try {
       const data = await request("/api/admin/settings");
       setSettingsMeta(data);
+      setWebhookEndpoint(data.postbackUrl ?? "");
       setSettings((current) => ({
         ...current,
-        postbackUrl: data.postbackUrl ?? "",
         amount: String(data.amount ?? 137),
       }));
     } catch (cause) {
